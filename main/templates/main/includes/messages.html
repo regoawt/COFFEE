@@ -1,0 +1,5 @@
+{% if messages %}
+  {% for message in messages %}
+    <script>M.toast({html: "{{message}}", classes: 'black rounded', displayLength:5000});</script>
+  {% endfor %}
+{% endif %}

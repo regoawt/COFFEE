@@ -1,0 +1,37 @@
+{% load static %}
+
+<div class="navbar-fixed">
+  <nav>
+    <div class="nav-wrapper">
+      <a href="" class="sidenav-trigger" data-target="mobile-demo"><i class="material-icons">menu</i></a>
+      <ul class="right hide-on-med-and-down">
+        <li><a href="{% url 'main:register' %}">Register</a></li>
+      </ul>
+    </div>
+  </nav>
+</div>
+
+<ul class='sidenav' id='mobile-demo'>
+
+  <li><a href="{% url 'main:register' %}">Register</a></li>
+</ul>
+
+<ul class='dropdown-content' id='dropdown-desktop'>
+    <li><a href="/admin/">Contribute</a></li>
+</ul>
+
+<ul class='dropdown-content' id='dropdown-mobile'>
+    <li><a href="/admin/">Contribute</a></li>
+</ul>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_sidenav = document.querySelectorAll('.sidenav');
+    var instances_sidenav = M.Sidenav.init(elems_sidenav, {});
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_dropdown = document.querySelectorAll('.dropdown-trigger');
+    var instances_dropdown = M.Dropdown.init(elems_dropdown, {});
+  });
+</script>

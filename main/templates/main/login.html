@@ -1,0 +1,16 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+<br>
+
+Fill in your username and password to find out whether there is anyboptonight.
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form.as_p }}
+
+    <button style="background-color:#000; color:white" class="btn btn-outline-info" type="submit">Login</button>
+  </form>
+
+  If you do not already have an account, <a href="{% url 'main:register' %}"><strong>register</strong></a> instead.
+{% endblock %}
