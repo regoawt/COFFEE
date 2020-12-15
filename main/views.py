@@ -1,18 +1,37 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import NewUserForm, GroupSelectionForm
+from django import forms
+from .forms import NewUserForm, GroupSelectionForm, QuestionForm, QuestionModelFormSet
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 
-def index(request):
+def generate_questionnaire(request):
+
+    if request.method == 'POST':
+        formset = QuestionModelFormSet(request.POST)
+
+        if formset.is_valid():
+            formset.save()
+            # TODO: Method to automatically assign questionnaire FK
+            
+            return redirect('main:home')
+    else:
+        formset = QuestionModelFormSet()
+        return render(request,
+                        template_name='main/generate_questionnaire.html',
+                        context={'formset':formset})
+
+def home(request):
 
     if request.user.is_authenticated:
-        return HttpResponse('Test')
+        return render(request = request,
+                      template_name='main/home.html',
+                      )
     else:
-        return redirect('main:register')
+        return redirect('main:login')
 
 def register(request):
 
@@ -74,3 +93,31 @@ def group_selection(request):
     return render(request = request,
                   template_name = "main/group_selection.html",
                   context={"group_form":group_form})
+
+def logout_request(request):
+
+    logout(request)
+    messages.info(request, "Logged out successfully!")
+
+    return redirect("main:home")
+
+def login_request(request):
+
+    if request.method == "POST":
+        form = AuthenticationForm(request=request, data=request.POST)
+        if form.is_valid():
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            if user is not None:
+                messages.success(request, "Logged in successfully!")
+                return redirect("main:home")
+            else:
+                messages.error(request, "Incorrect username or password")
+
+        else:
+            messages.error(request, "Incorrect username or password")
+
+    form = AuthenticationForm
+    return render(request, "main/login.html", context={"form": form})
