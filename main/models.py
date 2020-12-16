@@ -3,10 +3,13 @@ from django.contrib.auth.models import User,Group,Permission
 from django.utils import timezone
 
 class Questionnaire(models.Model):
+    '''Aggregate questions into a unit that can be used for many sessions.'''
 
     name = models.CharField(max_length=100)
-    num_questions = models.IntegerField()
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
 
 class Question(models.Model):
 
@@ -22,7 +25,9 @@ class Question(models.Model):
         return self.question
 
 class Answer(models.Model):
+
     question = models.ForeignKey(Question, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
 
 
 class LikertAnswer(Answer):

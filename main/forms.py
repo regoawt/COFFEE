@@ -23,4 +23,5 @@ class QuestionForm(forms.ModelForm):
         model = Question
         fields = ('question','question_category')
 
-QuestionModelFormSet = forms.modelformset_factory(model=Question,fields=('question','question_category'),extra=1,widgets={'question_category':forms.Select(attrs={'class': 'browser-default'})})
+QuestionModelFormSet = forms.modelformset_factory(model=Question,fields=('question','question_category'),extra=1,
+                                                widgets={'question_category':forms.Select(attrs={'class': 'browser-default'})})

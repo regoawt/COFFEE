@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, Group
+from .models import Question, Questionnaire
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .forms import NewUserForm, GroupSelectionForm, QuestionForm, QuestionModelFormSet
@@ -8,21 +9,34 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 
+# TODO: Add user group checks for relevant functionality
+# TODO: Build actual survey form
+
 def generate_questionnaire(request):
+    '''Allow tutors to create new questionnaires.'''
 
     if request.method == 'POST':
-        formset = QuestionModelFormSet(request.POST)
+        questionnaire_formset = QuestionModelFormSet(request.POST)
 
-        if formset.is_valid():
-            formset.save()
-            # TODO: Method to automatically assign questionnaire FK
-            
+        if questionnaire_formset.is_valid():
+
+            # Create new questionnaire instance and link to newly created questions
+            current_number_questionnaires = Questionnaire.objects.filter(user=request.user).count()
+            new_questionnaire_name = 'Questionnaire ' + str(current_number_questionnaires+1)
+            new_questionnaire = Questionnaire(name=new_questionnaire_name, user=request.user)
+            new_questionnaire.save()
+
+            for form in questionnaire_formset:
+                question = form.save()
+                question.questionnaire = new_questionnaire
+                question.save()
+
             return redirect('main:home')
     else:
-        formset = QuestionModelFormSet()
+        questionnaire_formset = QuestionModelFormSet(queryset=Question.objects.none())  # queryset set to none for empty formset
         return render(request,
                         template_name='main/generate_questionnaire.html',
-                        context={'formset':formset})
+                        context={'formset':questionnaire_formset})
 
 def home(request):
 
