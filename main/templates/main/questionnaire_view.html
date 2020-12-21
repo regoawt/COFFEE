@@ -1,0 +1,16 @@
+{% extends 'main/header.html' %}
+{% load static %}
+
+{% block content %}
+<form id="form-container" method="POST">
+  {% csrf_token %}
+  {% for question, answer_form in question_and_answer %}
+  <div class="form">
+    {{question}}
+    {{answer_form.as_p}}
+  </div>
+  {% endfor %}
+  <button type="submit">Submit</button>
+  <!-- FIXME: Button formatting -->
+</form>
+{% endblock %}

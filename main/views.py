@@ -1,16 +1,80 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, Group
-from .models import Question, Questionnaire
+from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .forms import NewUserForm, GroupSelectionForm, QuestionForm, QuestionModelFormSet
+from .forms import LikertForm, YesNoForm, PlainTextForm
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 
 # TODO: Add user group checks for relevant functionality
-# TODO: Build actual survey form
+# TODO: Comment code
+# TODO: Dynamic urls
+
+def questionnaire_view(request):
+    '''View questionnaire to fill in'''
+
+    # TODO: Select questionnaire based on session
+    selected_questionnaire = Questionnaire.objects.get(user_id=1)
+    linked_questions = selected_questionnaire.question_set.all()
+
+    # Get correct answer form based on question category
+    answer_forms = []
+    for question in linked_questions:
+        if question.question_category == 'likert':
+            answer_form = LikertForm()
+        elif question.question_category == 'yes_no':
+            answer_form = YesNoForm()
+        elif question.question_category == 'plain_text':
+            answer_form = PlainTextForm()
+
+        answer_forms.append(answer_form)
+
+    # Get questions
+    question_texts = []
+    for each_question in linked_questions:
+        question_texts.append(each_question.question)
+
+    # Submitted answers
+    if request.method == 'POST':
+        raw_post = dict(request.POST)
+        answer_list = raw_post['answer']
+
+        # Iterate through responses depending on question category
+        i = 0
+        for question in linked_questions:
+            raw_post['answer'] = answer_list[i]
+            if question.question_category == 'likert':
+                answer_form = LikertForm(raw_post)
+            elif question.question_category == 'yes_no':
+                answer_form = YesNoForm(raw_post)
+            elif question.question_category == 'plain_text':
+                answer_form = PlainTextForm(raw_post)
+            i+=1
+
+            print(answer_form)
+            # Save and assign extra fields
+            if answer_form.is_valid():
+                answer = answer_form.save()
+                answer.user = request.user
+                answer.question = question
+                answer.save()
+                # TODO: Add session key
+
+            else:
+                messages.error(request,'Enter a valid response')
+
+        return redirect('main:home')
+
+    else:
+        question_and_answer = zip(question_texts,answer_forms)
+
+        return render(request,
+                        template_name='main/questionnaire_view.html',
+                        context={'question_and_answer':question_and_answer})
 
 def generate_questionnaire(request):
     '''Allow tutors to create new questionnaires.'''
@@ -26,12 +90,17 @@ def generate_questionnaire(request):
             new_questionnaire = Questionnaire(name=new_questionnaire_name, user=request.user)
             new_questionnaire.save()
 
+            # Iterate through questions and assign to new questionnaire instance
             for form in questionnaire_formset:
                 question = form.save()
                 question.questionnaire = new_questionnaire
                 question.save()
 
             return redirect('main:home')
+
+        else:
+            for msg in questionnaire_formset.error_messages:
+                messages.error(request, f"{msg}: {questionnaire_formset.error_messages}")
     else:
         questionnaire_formset = QuestionModelFormSet(queryset=Question.objects.none())  # queryset set to none for empty formset
         return render(request,

@@ -18,40 +18,13 @@ class Question(models.Model):
                         ('plain_text','Plain text'))
 
     question = models.CharField(max_length=300)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
     question_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.SET_NULL, blank=True, null=True)
+    questionnaire = models.ManyToManyField(Questionnaire)
+
 
     def __str__(self):
         return self.question
-
-class Answer(models.Model):
-
-    question = models.ForeignKey(Question, on_delete=models.SET_NULL, blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
-
-
-class LikertAnswer(Answer):
-
-    LIKERT_CHOICES = (('strongly_agree','Strongly agree'),
-                        ('agree','Agree'),
-                        ('neutral','Neutral'),
-                        ('disagree','Disagree'),
-                        ('strongly_disagree','Strongly disagree'))
-
-    answer = models.CharField(max_length=20, choices=LIKERT_CHOICES)
-
-
-class YesNoAnswer(Answer):
-
-    YESNO_CHOICES = (('yes','Yes'),
-                        ('no','No'))
-
-    answer = models.CharField(max_length=20, choices=YESNO_CHOICES)
-
-
-class PlainTextAnswer(Answer):
-
-    answer = models.CharField(max_length=500)
 
 
 class Session(models.Model):
@@ -70,3 +43,41 @@ class Session(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Answer(models.Model):
+
+    question = models.ForeignKey(Question, on_delete=models.SET_NULL, blank=True, null=True)
+    session = models.ForeignKey(Session, on_delete=models.SET_NULL, blank=True, null=True)
+    user = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True)
+
+    def __str__(self):
+        linked_session = self.session
+        if linked_session is not None:
+            string = self.session.name + ' - ' + self.question.question
+        else:
+            string = 'None' + ' - ' + self.question.question
+        return string
+
+class LikertAnswer(Answer):
+
+    LIKERT_CHOICES = ((1,'Strongly agree'),
+                        (2,'Agree'),
+                        (3,'Neutral'),
+                        (4,'Disagree'),
+                        (5,'Strongly disagree'))
+
+    answer = models.IntegerField(max_length=2,choices=LIKERT_CHOICES)
+
+
+class YesNoAnswer(Answer):
+
+    YESNO_CHOICES = ((1,'Yes'),
+                        (0,'No'))
+
+    answer = models.IntegerField(max_length=2,choices=YESNO_CHOICES)
+
+
+class PlainTextAnswer(Answer):
+
+    answer = models.CharField(max_length=500)
