@@ -1,15 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User,Group,Permission
-from django.utils import timezone
+from django.utils import timezone, text
+
+# TODO: Implement slugs in save method
 
 class Questionnaire(models.Model):
     '''Aggregate questions into a unit that can be used for many sessions.'''
 
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+    slug = models.SlugField()
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = text.slugify(self.name)
+        super(Questionnaire, self).save(*args, **kwargs)
 
 class Question(models.Model):
 
@@ -29,20 +36,25 @@ class Question(models.Model):
 
 class Session(models.Model):
 
-    TYPE_CHOICES = (('lecture','Lecture'),
-                    ('small_group','Small group'),
-                    ('practical','Practical'),
-                    ('virtual','Virtual'))
+    TYPE_CHOICES = ((1,'Lecture'),
+                    (2,'Small group'),
+                    (3,'Practical'),
+                    (4,'Virtual'))
 
     name = models.CharField(max_length=100)
-    date = models.TimeField(default=timezone.now())
-    type = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    date = models.DateTimeField(default=timezone.now())
+    type = models.IntegerField(choices=TYPE_CHOICES)
     tutor = models.ForeignKey(User,on_delete=models.SET_NULL, blank=True, null=True, related_name='tutor')
     additional_tutors = models.ManyToManyField(User, blank=True, null=True, related_name='additional_tutors')
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    slug = models.SlugField()
 
     def __str__(self):
         return self.name
+
+    def save(self, *args, **kwargs):
+        self.slug = text.slugify(self.name)
+        super(Session, self).save(*args, **kwargs)
 
 
 class Answer(models.Model):

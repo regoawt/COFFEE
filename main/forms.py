@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer
+from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer, Questionnaire, Session
+from bootstrap_datepicker_plus import DateTimePickerInput
 
 
 class NewUserForm(UserCreationForm):
@@ -58,3 +59,19 @@ class PlainTextForm(forms.ModelForm):
         fields = ('answer',)
         widgets = {'answer':forms.Textarea(attrs={'placeholder':'Write your answer here'})}
         labels = {'answer':''}
+
+
+class SessionForm(forms.ModelForm):
+
+    class Meta:
+        model =  Session
+        fields = ('name','date','type','additional_tutors','questionnaire')
+        widgets = {'date': DateTimePickerInput(),
+                    'type':forms.Select(attrs={'class': 'browser-default'}),
+                    'additional_tutors':forms.SelectMultiple(attrs={'class': 'browser-default'}),
+                    'questionnaire': forms.Select(attrs={'class': 'browser-default'})}
+
+    def __init__(self, *args, **kwargs):
+        current_user = kwargs.pop('current_user',None)
+        super(SessionForm, self).__init__(*args, **kwargs)
+        self.fields['questionnaire'].queryset = Questionnaire.objects.filter(user=current_user)

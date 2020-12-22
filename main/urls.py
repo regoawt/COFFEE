@@ -5,8 +5,9 @@ app_name = 'main'
 urlpatterns = [
     path('', views.home, name='home'),
     path('register', views.register, name='register'),
-    path('group_selection', views.group_selection, name='group_selection'),
+    path('select_group', views.select_group, name='select_group'),
     path('login', views.login_request, name='login'),
-    path('generate_questionnaire', views.generate_questionnaire, name='generate_questionnaire'),
-    path('questionnaire_view', views.questionnaire_view, name='questionnaire_view')
+    path('create_questionnaire', views.create_questionnaire, name='create_questionnaire'),
+    path('questionnaire', views.questionnaire, name='questionnaire'),
+    path('create_session', views.create_session, name='create_session')
 ]

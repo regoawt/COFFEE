@@ -39,8 +39,15 @@ INSTALLED_APPS = [
     'main',
     'tinymce',
     'formtools',
+    'bootstrap4',
+    'bootstrap_datepicker_plus',
 
 ]
+
+# Use BOOTSTRAP3 if you are using Bootstrap 3
+BOOTSTRAP4 = {
+    'include_jquery': True,
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,0 +1,18 @@
+{% extends 'main/header.html' %}
+{% load bootstrap4 %}
+
+<!-- https://monim67.github.io/django-bootstrap-datepicker-plus/configure/ -->
+{% block extrahead %}
+{{ form.media }}
+{% endblock %}
+
+{% block content %}
+<form id="form-container" method="POST">
+  {% csrf_token %}
+  <div class="form">
+    {{form.as_p}}
+  </div>
+  <button type="submit">Submit</button>
+  <!-- FIXME: Button formatting -->
+</form>
+{% endblock %}

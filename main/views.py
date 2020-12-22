@@ -3,18 +3,41 @@ from django.contrib.auth.models import User, Group
 from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
-from .forms import NewUserForm, GroupSelectionForm, QuestionForm, QuestionModelFormSet
+from .forms import NewUserForm, GroupSelectionForm, QuestionForm, QuestionModelFormSet, SessionForm
 from .forms import LikertForm, YesNoForm, PlainTextForm
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 
-# TODO: Add user group checks for relevant functionality
+# TODO: Add user group checks for relevant functionality (using decorators?)
 # TODO: Comment code
-# TODO: Dynamic urls
+# TODO: Standardize nomenclature (templates, contexts, view names incl in urls.py)
 
-def questionnaire_view(request):
+def create_session(request):
+    '''View session'''
+
+    if request.method == 'POST':
+        session_form = SessionForm(request.POST, current_user=request.user)
+
+        if session_form.is_valid():
+            session = session_form.save(commit=False)
+            session.tutor = request.user
+            session.save()
+
+            return redirect('main:home')
+
+        # else:
+        #     return render(request,'main/error_template.html',{'form':session_form})
+
+    else:
+        session_form = SessionForm(current_user=request.user)
+
+        return render(request,
+                        template_name='main/session_form.html',
+                        context={'form':session_form})
+
+def questionnaire(request):
     '''View questionnaire to fill in'''
 
     # TODO: Select questionnaire based on session
@@ -73,10 +96,10 @@ def questionnaire_view(request):
         question_and_answer = zip(question_texts,answer_forms)
 
         return render(request,
-                        template_name='main/questionnaire_view.html',
+                        template_name='main/questionnaire.html',
                         context={'question_and_answer':question_and_answer})
 
-def generate_questionnaire(request):
+def create_questionnaire(request):
     '''Allow tutors to create new questionnaires.'''
 
     if request.method == 'POST':
@@ -104,7 +127,7 @@ def generate_questionnaire(request):
     else:
         questionnaire_formset = QuestionModelFormSet(queryset=Question.objects.none())  # queryset set to none for empty formset
         return render(request,
-                        template_name='main/generate_questionnaire.html',
+                        template_name='main/questionnaire_form.html',
                         context={'formset':questionnaire_formset})
 
 def home(request):
@@ -129,7 +152,7 @@ def register(request):
             user = authenticate(username=username, password=raw_password)
             login(request, user)
 
-            return redirect('main:group_selection')
+            return redirect('main:select_group')
         else:
             for msg in user_form.error_messages:
                 messages.error(request, f"{msg}: {user_form.error_messages}")
@@ -145,7 +168,7 @@ def register(request):
     template_name='main/register.html',
     context={'user_form':user_form})
 
-def group_selection(request):
+def select_group(request):
 
     user = request.user
 
@@ -169,13 +192,13 @@ def group_selection(request):
                 messages.error(request, f"{msg}: {user_form.error_messages}")
 
             return render(request = request,
-                          template_name = "main/group_selection.html",
+                          template_name = "main/group_form.html",
                           context={"group_form":group_form})
 
     group_form = GroupSelectionForm()
     return render(request = request,
-                  template_name = "main/group_selection.html",
-                  context={"group_form":group_form})
+                  template_name = "main/group_form.html",
+                  context={'form':group_form})
 
 def logout_request(request):
 
