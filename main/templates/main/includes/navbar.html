@@ -1,27 +1,45 @@
 {% load static %}
-
+<!-- TODO: Edit mobile navbar to bottom -->
 <div class="navbar-fixed">
   <nav>
     <div class="nav-wrapper">
+      <a href="{% url 'main:home' %}" class="brand-logo"><img src='{% static 'main/images/NHS_COFFEE_logo.jpg' %}'/></a>
       <a href="" class="sidenav-trigger" data-target="mobile-demo"><i class="material-icons">menu</i></a>
       <ul class="right hide-on-med-and-down">
+        <li><a href="{% url 'main:home' %}">Home</a></li>
+        <li><a href="{% url 'main:create_session' %}">Create Session</a></li>
+        {% if user.is_authenticated %}
+        <li><a class='dropdown-trigger' href="" data-target='dropdown-desktop'>{{user.username}}<i class="material-icons right">arrow_drop_down</i></a></li>
+        {% else %}
+        <li><a href="{% url 'main:login' %}">Login</a></li>
         <li><a href="{% url 'main:register' %}">Register</a></li>
+        {% endif %}
       </ul>
     </div>
   </nav>
 </div>
 
 <ul class='sidenav' id='mobile-demo'>
-
+  <li><a href="{% url 'main:home' %}">Home</a></li>
+  <li><a href="{% url 'main:create_session' %}">Create Session</a></li>
+  {% if user.is_authenticated %}
+  <li><a class='dropdown-trigger' href="" data-target='dropdown-mobile'>{{user.username}}<i class="material-icons right">arrow_drop_down</i></a></li>
+  {% else %}
+  <li><a href="{% url 'main:login' %}">Login</a></li>
   <li><a href="{% url 'main:register' %}">Register</a></li>
+  {% endif %}
 </ul>
 
 <ul class='dropdown-content' id='dropdown-desktop'>
-    <li><a href="/admin/">Contribute</a></li>
+    <li><a href="/admin/">Admin</a></li>
+    <li class="divider" tabindex="-1"></li>
+    <li><a href="{% url 'main:logout' %}">Logout</a></li>
 </ul>
 
 <ul class='dropdown-content' id='dropdown-mobile'>
-    <li><a href="/admin/">Contribute</a></li>
+    <li><a href="/admin/">Admin</a></li>
+    <li class="divider" tabindex="-1"></li>
+    <li><a href="{% url 'main:logout' %}">Logout</a></li>
 </ul>
 
 <script>

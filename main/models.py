@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User,Group,Permission
 from django.utils import timezone, text
 
-# TODO: Implement slugs in save method
 
 class Questionnaire(models.Model):
     '''Aggregate questions into a unit that can be used for many sessions.'''
@@ -33,7 +32,8 @@ class Question(models.Model):
     def __str__(self):
         return self.question
 
-
+# TODO: Add file upload field
+# TODO: Add session end time
 class Session(models.Model):
 
     TYPE_CHOICES = ((1,'Lecture'),
@@ -45,7 +45,7 @@ class Session(models.Model):
     date = models.DateTimeField(default=timezone.now())
     type = models.IntegerField(choices=TYPE_CHOICES)
     tutor = models.ForeignKey(User,on_delete=models.SET_NULL, blank=True, null=True, related_name='tutor')
-    additional_tutors = models.ManyToManyField(User, blank=True, null=True, related_name='additional_tutors')
+    additional_tutors = models.ManyToManyField(User, blank=True, related_name='additional_tutors')
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
     slug = models.SlugField()
 
@@ -53,7 +53,7 @@ class Session(models.Model):
         return self.name
 
     def save(self, *args, **kwargs):
-        self.slug = text.slugify(self.name)
+        self.slug = text.slugify(self.name+str(self.date))
         super(Session, self).save(*args, **kwargs)
 
 
@@ -79,7 +79,7 @@ class LikertAnswer(Answer):
                         (4,'Disagree'),
                         (5,'Strongly disagree'))
 
-    answer = models.IntegerField(max_length=2,choices=LIKERT_CHOICES)
+    answer = models.IntegerField(choices=LIKERT_CHOICES)
 
 
 class YesNoAnswer(Answer):
@@ -87,7 +87,7 @@ class YesNoAnswer(Answer):
     YESNO_CHOICES = ((1,'Yes'),
                         (0,'No'))
 
-    answer = models.IntegerField(max_length=2,choices=YESNO_CHOICES)
+    answer = models.IntegerField(choices=YESNO_CHOICES)
 
 
 class PlainTextAnswer(Answer):

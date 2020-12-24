@@ -12,7 +12,8 @@ from django.core.mail import EmailMessage
 
 # TODO: Add user group checks for relevant functionality (using decorators?)
 # TODO: Comment code
-# TODO: Standardize nomenclature (templates, contexts, view names incl in urls.py)
+# TODO: Create homepage dashboard view
+# TODO: Add individual session view
 
 def create_session(request):
     '''View session'''
@@ -37,11 +38,10 @@ def create_session(request):
                         template_name='main/session_form.html',
                         context={'form':session_form})
 
-def questionnaire(request):
+def questionnaire(request, tutor, session_slug, questionnaire_slug):
     '''View questionnaire to fill in'''
 
-    # TODO: Select questionnaire based on session
-    selected_questionnaire = Questionnaire.objects.get(user_id=1)
+    selected_questionnaire = Questionnaire.objects.get(slug=questionnaire_slug,user__username=tutor)
     linked_questions = selected_questionnaire.question_set.all()
 
     # Get correct answer form based on question category
@@ -84,8 +84,8 @@ def questionnaire(request):
                 answer = answer_form.save()
                 answer.user = request.user
                 answer.question = question
+                answer.session = Session.objects.get(tutor=tutor, slug=session_slug)
                 answer.save()
-                # TODO: Add session key
 
             else:
                 messages.error(request,'Enter a valid response')
@@ -139,6 +139,7 @@ def home(request):
     else:
         return redirect('main:login')
 
+# TODO: Create default questionnaire on registering as tutor
 def register(request):
 
     if request.method == "POST":
