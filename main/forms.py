@@ -65,11 +65,14 @@ class SessionForm(forms.ModelForm):
 
     class Meta:
         model =  Session
-        fields = ('name','date','type','additional_tutors','questionnaire')
-        widgets = {'date': DateTimePickerInput(),
+        fields = ('name','start_datetime','end_datetime','type','additional_tutors','questionnaire','resources')
+        widgets = {'start_datetime': DateTimePickerInput(),
+                    'end_datetime': DateTimePickerInput(),
                     'type':forms.Select(attrs={'class': 'browser-default'}),
                     'additional_tutors':forms.SelectMultiple(attrs={'class': 'browser-default'}),
-                    'questionnaire': forms.Select(attrs={'class': 'browser-default'})}
+                    'questionnaire': forms.Select(attrs={'class': 'browser-default'}),
+                    'resources': forms.ClearableFileInput(attrs={'multiple': True}),
+                    }
 
     def __init__(self, *args, **kwargs):
         current_user = kwargs.pop('current_user',None)

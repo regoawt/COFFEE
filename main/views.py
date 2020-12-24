@@ -14,12 +14,13 @@ from django.core.mail import EmailMessage
 # TODO: Comment code
 # TODO: Create homepage dashboard view
 # TODO: Add individual session view
+# TODO: Messages on completion of forms
 
 def create_session(request):
     '''View session'''
 
     if request.method == 'POST':
-        session_form = SessionForm(request.POST, current_user=request.user)
+        session_form = SessionForm(request.POST, request.FILES, current_user=request.user)
 
         if session_form.is_valid():
             session = session_form.save(commit=False)
@@ -28,8 +29,10 @@ def create_session(request):
 
             return redirect('main:home')
 
-        # else:
-        #     return render(request,'main/error_template.html',{'form':session_form})
+        else:
+            return render(request,
+                            template_name='main/session_form.html',
+                            context={'form':session_form})
 
     else:
         session_form = SessionForm(current_user=request.user)
@@ -122,8 +125,9 @@ def create_questionnaire(request):
             return redirect('main:home')
 
         else:
-            for msg in questionnaire_formset.error_messages:
-                messages.error(request, f"{msg}: {questionnaire_formset.error_messages}")
+            return render(request,
+                            template_name='main/questionnaire_form.html',
+                            context={'formset':questionnaire_formset})
     else:
         questionnaire_formset = QuestionModelFormSet(queryset=Question.objects.none())  # queryset set to none for empty formset
         return render(request,

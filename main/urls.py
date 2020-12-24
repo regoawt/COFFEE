@@ -1,5 +1,7 @@
 from django.urls import path
 from . import views
+from django.conf import settings
+from django.conf.urls.static import static
 
 app_name = 'main'
 urlpatterns = [
@@ -12,3 +14,7 @@ urlpatterns = [
     path('questionnaire/<tutor>/<slug:session_slug>/<slug:questionnaire_slug>/', views.questionnaire, name='questionnaire'),
     path('create_session/', views.create_session, name='create_session')
 ]
+
+# Media files in dev server
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

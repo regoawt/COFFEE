@@ -7,10 +7,24 @@
 {% endblock %}
 
 {% block content %}
-<form id="form-container" method="POST">
+<form id="form-container" method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="form">
     {{form.as_p}}
+    {% if form.errors %}
+      {% for field in form %}
+          {% for error in field.errors %}
+              <div class="alert alert-danger">
+                  <strong>{{ error|escape }}</strong>
+              </div>
+          {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+          <div class="alert alert-danger">
+              <strong>{{ error|escape }}</strong>
+          </div>
+      {% endfor %}
+    {% endif %}
   </div>
   <button type="submit">Submit</button>
 </form>
