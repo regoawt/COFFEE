@@ -1,23 +1,87 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, reverse
 from django.contrib.auth.models import User, Group
-from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer
+from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer, Session, Resource
 from django.contrib.auth.forms import AuthenticationForm
 from django import forms
 from .forms import NewUserForm, GroupSelectionForm, QuestionForm, QuestionModelFormSet, SessionForm
-from .forms import LikertForm, YesNoForm, PlainTextForm
+from .forms import LikertForm, YesNoForm, PlainTextForm, ResourceForm
 from django.contrib.auth import logout, authenticate, login
 from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
+from qr_code.qrcode.utils import QRCodeOptions
 
 # TODO: Add user group checks for relevant functionality (using decorators?)
 # TODO: Comment code
 # TODO: Create homepage dashboard view
-# TODO: Add individual session view
 # TODO: Messages on completion of forms
 
-def create_session(request):
+def upload_resources(request, session_slug):
+    '''Upload resources'''
+
+    session = Session.objects.get(slug=session_slug)
+
+    if request.method == 'POST':
+        resource_form = ResourceForm(request.POST, request.FILES)
+        files = request.FILES.getlist('file')
+
+        if resource_form.is_valid():
+            for file in files:
+                resource = Resource(session=session, file=file)
+                resource.save()
+
+            return redirect('main:session', session.slug)
+
+        else:
+            return render(request,
+                            template_name='main/resource_form.html',
+                            context={'form':resource_form})
+
+    else:
+        resource_form = ResourceForm()
+        return render(request,
+                        template_name='main/resource_form.html',
+                        context={'form':resource_form})
+
+def download_resources(request, session_slug):
+    '''Download resources'''
+
+    resources = [resource.file for resource in list(Resource.objects.filter(session__slug=session_slug))]
+    print(resources)
+    return render(request,
+                    template_name='main/download_resources.html',
+                    context={'resources':resources})
+
+def sessions(request):
+    '''View all sessions'''
+
+    sessions = Session.objects.filter(tutor=request.user)
+
+    return render(request,
+                    template_name='main/sessions.html',
+                    context={'sessions':sessions})
+
+
+def session(request, session_slug):
     '''View session'''
+
+    session = Session.objects.get(slug=session_slug,tutor=request.user)
+    qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
+    qr_url = 'http://192.168.0.29:8000/questionnaire/{}/{}/{}/'.format(request.user.username,session.slug,session.questionnaire.slug)
+    resource_form_url = '/sessions/{}/upload/'.format(session.slug)
+    dl_resources_url = '/sessions/{}/download'.format(session.slug)
+
+    return render(request,
+                    template_name='main/session.html',
+                    context={'session':session,
+                                'qr_options':qr_options,
+                                'qr_url':qr_url,
+                                'resource_form_url':resource_form_url,
+                                'dl_resources_url':dl_resources_url})
+
+
+def create_session(request):
+    '''Create session'''
 
     if request.method == 'POST':
         session_form = SessionForm(request.POST, request.FILES, current_user=request.user)
@@ -27,7 +91,8 @@ def create_session(request):
             session.tutor = request.user
             session.save()
 
-            return redirect('main:home')
+            # Redirect to page of newly created session
+            return redirect('main:session', session.slug)
 
         else:
             return render(request,
@@ -91,9 +156,9 @@ def questionnaire(request, tutor, session_slug, questionnaire_slug):
                 answer.save()
 
             else:
-                messages.error(request,'Enter a valid response')
-
-        return redirect('main:home')
+                return render(request,
+                                template_name='main/questionnaire.html',
+                                context={'question_and_answer':question_and_answer})
 
     else:
         question_and_answer = zip(question_texts,answer_forms)

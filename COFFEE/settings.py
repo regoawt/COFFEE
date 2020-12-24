@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'formtools',
     'bootstrap4',
     'bootstrap_datepicker_plus',
+    'qr_code',
 
 ]
 

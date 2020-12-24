@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer, Questionnaire, Session
+from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer, Questionnaire, Session, Resource
 from bootstrap_datepicker_plus import DateTimePickerInput
 
 
@@ -65,16 +65,23 @@ class SessionForm(forms.ModelForm):
 
     class Meta:
         model =  Session
-        fields = ('name','start_datetime','end_datetime','type','additional_tutors','questionnaire','resources')
+        fields = ('name','start_datetime','end_datetime','type','additional_tutors','questionnaire')
         widgets = {'start_datetime': DateTimePickerInput(),
                     'end_datetime': DateTimePickerInput(),
                     'type':forms.Select(attrs={'class': 'browser-default'}),
                     'additional_tutors':forms.SelectMultiple(attrs={'class': 'browser-default'}),
                     'questionnaire': forms.Select(attrs={'class': 'browser-default'}),
-                    'resources': forms.ClearableFileInput(attrs={'multiple': True}),
                     }
 
     def __init__(self, *args, **kwargs):
         current_user = kwargs.pop('current_user',None)
         super(SessionForm, self).__init__(*args, **kwargs)
         self.fields['questionnaire'].queryset = Questionnaire.objects.filter(user=current_user)
+
+
+class ResourceForm(forms.ModelForm):
+
+    class Meta:
+        model = Resource
+        fields = ('file',)
+        widgets = {'file':forms.ClearableFileInput(attrs={'multiple':True})}

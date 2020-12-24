@@ -9,6 +9,7 @@
         <li><a href="{% url 'main:home' %}">Home</a></li>
         {% if user.is_authenticated %}
         <li><a href="{% url 'main:create_session' %}">Create Session</a></li>
+        <li><a href="{% url 'main:sessions' %}">View Sessions</a></li>
         <li><a class='dropdown-trigger' href="" data-target='dropdown-desktop'>{{user.username}}<i class="material-icons right">arrow_drop_down</i></a></li>
         {% else %}
         <li><a href="{% url 'main:login' %}">Login</a></li>
@@ -23,6 +24,7 @@
   <li><a href="{% url 'main:home' %}">Home</a></li>
   {% if user.is_authenticated %}
   <li><a href="{% url 'main:create_session' %}">Create Session</a></li>
+  <li><a href="{% url 'main:sessions' %}">View Sessions</a></li>
   <li><a class='dropdown-trigger' href="" data-target='dropdown-mobile'>{{user.username}}<i class="material-icons right">arrow_drop_down</i></a></li>
   {% else %}
   <li><a href="{% url 'main:login' %}">Login</a></li>

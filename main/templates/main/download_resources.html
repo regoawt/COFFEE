@@ -1,0 +1,8 @@
+{% extends 'main/header.html' %}
+{% load static %}
+
+{% block content %}
+{% for resource in resources %}
+  <p><a href='{{ resource.url }}' download>{{ resource.name }}</a></p>
+{% endfor %}
+{% endblock %}
