@@ -8,6 +8,20 @@ Sign up to COFFEE
   <form method="POST">
     {% csrf_token %}
     {{ user_form.as_p }}
+    {% if form.errors %}
+      {% for field in form %}
+          {% for error in field.errors %}
+              <div class="alert alert-danger">
+                  <strong>{{ error|escape }}</strong>
+              </div>
+          {% endfor %}
+      {% endfor %}
+      {% for error in form.non_field_errors %}
+          <div class="alert alert-danger">
+              <strong>{{ error|escape }}</strong>
+          </div>
+      {% endfor %}
+    {% endif %}
 
     <button style="background-color:#000; color:white" class="btn btn-outline-info" type="submit">Sign Up</button>
   </form>

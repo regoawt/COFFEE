@@ -5,6 +5,7 @@ import random
 import string
 
 # FIXME: Save method slugify changing on every save due to random
+# TODO: Add attendees M2M in Session
 
 class Questionnaire(models.Model):
     '''Aggregate questions into a unit that can be used for many sessions.'''
@@ -53,6 +54,8 @@ class Session(models.Model):
     tutor = models.ForeignKey(User,on_delete=models.SET_NULL, blank=True, null=True, related_name='tutor')
     additional_tutors = models.ManyToManyField(User, blank=True, related_name='additional_tutors')
     questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    attendees = models.ManyToManyField(User, blank=True, related_name='attendees')
+    submitted_questionnaire = models.ManyToManyField(User, blank=True, related_name='submitted_questionnaire')
     slug = models.SlugField()
 
     def __str__(self):

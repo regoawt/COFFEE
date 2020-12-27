@@ -1,0 +1,14 @@
+{% extends 'main/header.html' %}
+{% load static %}
+{% load qr_code %}
+
+{% block content %}
+<div class="row">
+    <div class="col s12, m12, l12">
+          <h3>{{session.name}}</h3>
+          <p style="font-size:70%">Date: <strong>{{session.start_datetime}}</strong></p>
+          <p style="font-size:70%">Tutor: <strong>{{session.tutor.first_name}} {{session.tutor.last_name}}</strong></p>
+          <p><a href='{{dl_resources_url}}'>Download resources</a></p>
+    </div>
+</div>
+{% endblock %}

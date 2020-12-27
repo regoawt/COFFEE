@@ -20,4 +20,3 @@ class SessionAdmin(admin.ModelAdmin):
 @admin.register(Resource)
 class ResourceAdmin(admin.ModelAdmin):
     pass
-# TODO: Register other models

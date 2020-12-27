@@ -1,0 +1,19 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+<div class="row">
+    {% for session in attended_sessions %}
+        <div class="col s12 m6 l4">
+            <a href="/sessions/{{session.slug}}", style="color:#000">
+                <div class="card hoverable">
+                    <div class="card-content">
+                        <div class="card-title">{{session.name}}</div>
+                        <p>Date: {{session.start_datetime}}</p>
+                        <p>Tutor: {{session.tutor.first_name}} {{session.tutor.last_name}}</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
