@@ -1,5 +1,6 @@
 {% load static %}
 <!-- TODO: Edit mobile navbar to bottom -->
+<!-- TODO: Create session through FAB in unified Session nav link -->
 <div class="navbar-fixed">
   <nav>
     <div class="nav-wrapper">
@@ -8,8 +9,7 @@
       <ul class="right hide-on-med-and-down">
         <li><a href="{% url 'main:home' %}">Home</a></li>
         {% if user.is_authenticated %}
-        <li><a href="{% url 'main:create_session' %}">Create session</a></li>
-        <li><a href="{% url 'main:sessions' %}">View sessions</a></li>
+        <li><a href="{% url 'main:sessions' %}">Sessions</a></li>
         <li><a class='dropdown-trigger' href="" data-target='dropdown-desktop'>{{user.username}}<i class="material-icons right">arrow_drop_down</i></a></li>
         {% else %}
         <li><a href="{% url 'main:login' %}">Login</a></li>
@@ -23,8 +23,7 @@
 <ul class='sidenav' id='mobile-demo'>
   <li><a href="{% url 'main:home' %}">Home</a></li>
   {% if user.is_authenticated %}
-  <li><a href="{% url 'main:create_session' %}">Create Session</a></li>
-  <li><a href="{% url 'main:sessions' %}">View Sessions</a></li>
+  <li><a href="{% url 'main:sessions' %}">Sessions</a></li>
   <li><a class='dropdown-trigger' href="" data-target='dropdown-mobile'>{{user.username}}<i class="material-icons right">arrow_drop_down</i></a></li>
   {% else %}
   <li><a href="{% url 'main:login' %}">Login</a></li>

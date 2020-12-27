@@ -25,13 +25,13 @@ class Questionnaire(models.Model):
 class Question(models.Model):
     '''Base question class'''
 
-    CATEGORY_CHOICES = (('likert','Likert'),
-                        ('yes_no','Yes/No'),
-                        ('plain_text','Plain text'))
+    CATEGORY_CHOICES = ((1,'Likert'),
+                        (2,'Yes/No'),
+                        (3,'Plain text'))
 
     question = models.CharField(max_length=300)
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
-    question_category = models.CharField(max_length=20, choices=CATEGORY_CHOICES)
+    question_category = models.IntegerField(choices=CATEGORY_CHOICES)
     questionnaire = models.ManyToManyField(Questionnaire)
 
 
@@ -53,7 +53,7 @@ class Session(models.Model):
     type = models.IntegerField(choices=TYPE_CHOICES)
     tutor = models.ForeignKey(User,on_delete=models.SET_NULL, blank=True, null=True, related_name='tutor')
     additional_tutors = models.ManyToManyField(User, blank=True, related_name='additional_tutors')
-    questionnaire = models.ForeignKey(Questionnaire, on_delete=models.CASCADE)
+    questionnaire = models.ForeignKey(Questionnaire, null=True, on_delete=models.SET_NULL)
     attendees = models.ManyToManyField(User, blank=True, related_name='attendees')
     submitted_questionnaire = models.ManyToManyField(User, blank=True, related_name='submitted_questionnaire')
     slug = models.SlugField()

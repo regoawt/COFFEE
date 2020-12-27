@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap4',
     'bootstrap_datepicker_plus',
     'qr_code',
+    'searchableselect',
 
 ]
 

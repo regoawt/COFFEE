@@ -11,14 +11,12 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from qr_code.qrcode.utils import QRCodeOptions
+from .utils import is_group, create_default_questionnaire
 
 # TODO: Add user group checks for relevant functionality (using decorators?)
 # TODO: Comment code
 # TODO: Create homepage dashboard view
 # TODO: Messages on completion of forms
-
-def is_group(user, group):
-    return user.groups.filter(name=group).exists()
 
 @login_required
 def upload_resources(request, session_slug):
@@ -65,7 +63,7 @@ def download_resources(request, session_slug):
                     template_name='main/download_resources.html',
                     context={'resources':resources})
 
-
+# TODO: Include delete session button in card
 @login_required
 def sessions(request):
     '''View all sessions'''
@@ -93,9 +91,9 @@ def session(request, session_slug):
     if is_group(request.user, 'Tutors'):
 
         qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
-        qr_url = 'http://192.168.0.29:8000/sessions/{}/{}/'.format(session.slug,session.questionnaire.slug)
+        qr_url = 'http://192.168.0.29:8000/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
-        questionnaire_url = '/sessions/{}/{}/'.format(session.slug, session.questionnaire.slug)
+        questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
 
         return render(request,
                         template_name='main/session_tutors.html',
@@ -158,11 +156,11 @@ def questionnaire(request, session_slug, questionnaire_slug):
     # Get correct answer form based on question category
     answer_forms = []
     for question in linked_questions:
-        if question.question_category == 'likert':
+        if question.question_category == 1:
             answer_form = LikertForm()
-        elif question.question_category == 'yes_no':
+        elif question.question_category == 2:
             answer_form = YesNoForm()
-        elif question.question_category == 'plain_text':
+        elif question.question_category == 3:
             answer_form = PlainTextForm()
 
         answer_forms.append(answer_form)
@@ -181,11 +179,11 @@ def questionnaire(request, session_slug, questionnaire_slug):
         i = 0
         for question in linked_questions:
             raw_post['answer'] = answer_list[i]
-            if question.question_category == 'likert':
+            if question.question_category == 1:
                 answer_form = LikertForm(raw_post)
-            elif question.question_category == 'yes_no':
+            elif question.question_category == 2:
                 answer_form = YesNoForm(raw_post)
-            elif question.question_category == 'plain_text':
+            elif question.question_category == 3:
                 answer_form = PlainTextForm(raw_post)
             i+=1
 
@@ -316,8 +314,7 @@ def select_group(request):
                 user.groups.add(group)
 
                 # Create default questionnaire
-                default_questionnaire = Questionnaire(name='Default questionnaire', user=user)
-                default_questionnaire.save()
+                create_default_questionnaire(user)
 
             elif account_type == 'student':
                 group = Group.objects.get(name='Students')

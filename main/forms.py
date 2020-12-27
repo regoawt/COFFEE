@@ -3,6 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer, Questionnaire, Session, Resource
 from bootstrap_datepicker_plus import DateTimePickerInput
+from django.contrib.admin.widgets import FilteredSelectMultiple
 
 
 class NewUserForm(UserCreationForm):
@@ -63,20 +64,30 @@ class PlainTextForm(forms.ModelForm):
 
 class SessionForm(forms.ModelForm):
 
+    # FIXME: Better multiple select widget for additional_tutors
+    # additional_tutors = forms.ModelMultipleChoiceField(widget=FilteredSelectMultiple('additional_tutors', is_stacked=False),
+    #                                                 queryset=User.objects.filter(groups__name='Tutors'))
+    #
+    # class Media:
+    #     css = {'all': ('/static/admin/css/widgets.css',),}
+    #     js = ('/admin/jsi18n',)
+
     class Meta:
         model =  Session
         fields = ('name','start_datetime','end_datetime','type','additional_tutors','questionnaire')
         widgets = {'start_datetime': DateTimePickerInput(),
                     'end_datetime': DateTimePickerInput(),
                     'type':forms.Select(attrs={'class': 'browser-default'}),
-                    'additional_tutors':forms.SelectMultiple(attrs={'class': 'browser-default'}),
+                    'additional_tutors': forms.SelectMultiple(attrs={'class': 'browser-default'}),
                     'questionnaire': forms.Select(attrs={'class': 'browser-default'}),
                     }
 
     def __init__(self, *args, **kwargs):
+        # Add kwarg to get user and filter questionnaire queryset by user
         current_user = kwargs.pop('current_user',None)
         super(SessionForm, self).__init__(*args, **kwargs)
         self.fields['questionnaire'].queryset = Questionnaire.objects.filter(user=current_user)
+        self.fields['additional_tutors'].queryset = User.objects.filter(groups__name='Tutors')
 
 
 class ResourceForm(forms.ModelForm):

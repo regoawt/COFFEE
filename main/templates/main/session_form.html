@@ -10,7 +10,10 @@
 <form id="form-container" method="POST" enctype="multipart/form-data">
   {% csrf_token %}
   <div class="form">
+    <!-- Uncomment for better widget if fixed -->
+    <!-- {{form.media}} -->
     {{form.as_p}}
+    <!-- <script type="text/javascript" src="{% url 'jsi18n' %}"></script> -->
     {% if form.errors %}
       {% for field in form %}
           {% for error in field.errors %}
