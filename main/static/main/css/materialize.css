@@ -3485,20 +3485,13 @@ small {
   border-radius: 2px;
   background-color: #FFFFFF; }
 
-a.custom-card {
-  color: #005eb8; }
-  a.custom-card:hover {
-    color: #FFFFFF;
-    text-decoration: none; }
-
 .card {
-  background-color: #FFFFFF;
+  color: #005eb8;
   position: relative;
   margin: 0.5rem 0 1rem 0;
+  background-color: #FFFFFF;
   transition: box-shadow .25s;
   border-radius: 2px; }
-  .card:hover {
-    background-color: #005eb8; }
   .card .card-title {
     font-size: 24px;
     font-weight: 300; }
@@ -3563,6 +3556,7 @@ a.custom-card {
       bottom: 0;
       width: 100%; }
     .card .card-image .card-title {
+      color: #FFFFFF;
       position: absolute;
       bottom: 0;
       left: 0;
@@ -3592,7 +3586,7 @@ a.custom-card {
       transition: color .3s ease;
       text-transform: uppercase; }
       .card .card-action a:not(.btn):not(.btn-large):not(.btn-small):not(.btn-large):not(.btn-floating):hover {
-        color: #005eb8;
+        color: #41b6e6;
         text-decoration: none; }
   .card .card-reveal {
     padding: 24px;

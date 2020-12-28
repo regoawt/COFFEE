@@ -3,19 +3,20 @@
 
 {% block content %}
 <div class="row">
-    {% for session in sessions %}
-        <div class="col s12 m6 l4">
-          <!-- TODO: Try putting anchor inside card div -->
-            <a href="/sessions/{{session.slug}}" class="custom-card">
-                <div class="card hoverable">
-                    <div class="card-content">
-                        <div class="card-title"><strong>{{session.name}}</strong></div>
-                        <p>Date: {{session.start_datetime}}</p>
-                    </div>
-                </div>
-            </a>
+  {% for session in sessions %}
+    <div class="col s12 m6 l7">
+      <div class="card hoverable">
+        <div class="card-content">
+          <div class="card-title"><strong>{{session.name}}</strong></div>
+          <p>Date: {{session.start_datetime}}</p>
         </div>
-    {% endfor %}
+        <div class="card-action">
+            <a href="/sessions/{{session.slug}}/">View</a>
+            <a href="/sessions/{{session.slug}}/edit/">Edit</a>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
 </div>
 
 <div class="fixed-action-btn">

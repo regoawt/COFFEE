@@ -17,6 +17,7 @@ urlpatterns = [
     path('sessions/<slug:session_slug>/', views.session, name='session'),
     path('sessions/<slug:session_slug>/download/', views.download_resources, name='download_resources'),
     path('sessions/<slug:session_slug>/upload/', views.upload_resources, name='upload_resources'),
+    path('sessions/<slug:session_slug>/edit/', views.edit_session, name='edit_session'),
 
 ]
 

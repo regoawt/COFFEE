@@ -112,6 +112,32 @@ def session(request, session_slug):
 
 
 @login_required
+def edit_session(request, session_slug):
+    '''Edit session'''
+
+    if is_group(request.user, 'Tutors'):
+
+        session = Session.objects.get(slug=session_slug)
+        if request.method == 'POST':
+            session_form = SessionForm(request.POST, current_user=request.user)
+
+            if session_form.is_valid():
+                session = session_form.save()
+
+                # Redirect to page of newly created session
+                return redirect('main:session', session.slug)
+
+            else:
+                return render(request,
+                                template_name='main/session_form.html',
+                                context={'form':session_form})
+        else:
+            session_form = SessionForm(instance=session, current_user=request.user)
+            return render(request,
+                            template_name='main/session_form.html',
+                            context={'form':session_form})
+
+@login_required
 def create_session(request):
     '''Create session'''
 
@@ -267,7 +293,7 @@ def home(request):
                       template_name='main/home_tutors.html',
                       )
 
-# TODO: Create default questionnaire on registering as tutor
+
 def register(request):
 
     if request.method == "POST":
