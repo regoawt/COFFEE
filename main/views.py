@@ -12,10 +12,12 @@ from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from qr_code.qrcode.utils import QRCodeOptions
 from .utils import is_group, create_default_questionnaire
+from datetime import datetime
 
 # TODO: Comment code
 # TODO: Create homepage dashboard view
 # TODO: Messages on completion of forms
+# TODO: Session view split into upcoming and previous sessions
 
 @login_required
 def upload_resources(request, session_slug):
@@ -68,11 +70,18 @@ def sessions(request):
     '''View all sessions'''
 
     if is_group(request.user,'Tutors'):
-        sessions = Session.objects.filter(tutor=request.user)
+        upcoming_sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now()).order_by('-start_datetime')
+        upcoming_qr_urls = ['http://192.168.0.29:8000/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug) for session in upcoming_sessions]
+        upcoming = zip(upcoming_sessions, upcoming_qr_urls)
+
+        past_sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now()).order_by('-start_datetime')
+        past_qr_urls = ['http://192.168.0.29:8000/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug) for session in past_sessions]
+        past = zip(past_sessions, past_qr_urls)
 
         return render(request,
                         template_name='main/sessions.html',
-                        context={'sessions':sessions})
+                        context={'upcoming':upcoming,
+                                    'past':past})
 
     else:
         messages.error(request,'Students cannot access this area!')
@@ -119,7 +128,7 @@ def edit_session(request, session_slug):
 
         session = Session.objects.get(slug=session_slug)
         if request.method == 'POST':
-            session_form = SessionForm(request.POST, current_user=request.user)
+            session_form = SessionForm(request.POST, instance=session, current_user=request.user)
 
             if session_form.is_valid():
                 session = session_form.save()

@@ -63,7 +63,8 @@ class Session(models.Model):
 
     # Overwrite save method for dynamic slug assignment
     def save(self, *args, **kwargs):
-        self.slug = text.slugify(self.name+'-'+''.join(random.choices(string.ascii_uppercase + string.digits, k=10)))
+        if self.slug == None:
+            self.slug = text.slugify(self.name+'-'+''.join(random.choices(string.ascii_uppercase + string.digits, k=10)))
         super(Session, self).save(*args, **kwargs)
 
 

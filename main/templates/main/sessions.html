@@ -1,19 +1,92 @@
 {% extends 'main/header.html' %}
 {% load static %}
+{% load qr_code %}
 
+<!-- TODO: Implement scrollspy with table of contents -->
+<!-- TODO: Split session into upcoming and past -->
+<!-- IDEA: Try horizontal scroll table for upcoming sessions https://stackoverflow.com/questions/43741090/how-to-horizontally-scroll-through-columns-in-materialize-css -->
+<!-- TODO: 'Cancel' card action justified to righthandside -->
 {% block content %}
+
 <div class="row">
-  {% for session in sessions %}
-    <div class="col s12 m6 l7">
-      <div class="card hoverable">
+  <h3 class="col push-l2">Upcoming sessions</h3>
+  <br> <br> <br> <br> <br>
+  {% for session, qr_url in upcoming %}
+    <div class="col s12 m10 l8 push-l2">
+      <div class="card">
         <div class="card-content">
-          <div class="card-title"><strong>{{session.name}}</strong></div>
-          <p>Date: {{session.start_datetime}}</p>
+          <div class="row">
+            <div class="col s1 push-s9 push-l10">
+              <!-- Modal Trigger -->
+              <button data-target="modal{{session.slug}}" class="btn modal-trigger">QR</button>
+            </div>
+            <div class="col s8 pull-s1">
+              <div class="card-title"><strong>{{session.name}}</strong></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col s10">
+
+              Date: {{session.start_datetime}}
+            </div>
+          </div>
         </div>
         <div class="card-action">
             <a href="/sessions/{{session.slug}}/">View</a>
             <a href="/sessions/{{session.slug}}/edit/">Edit</a>
         </div>
+      </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal{{session.slug}}" class="modal">
+      <div class="modal-content">
+        <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="row">
+  <h3 class="col push-l2">Past sessions</h3>
+  <br> <br> <br> <br> <br>
+  {% for session, qr_url in past %}
+    <div class="col s12 m10 l8 push-l2">
+      <div class="card">
+        <div class="card-content">
+          <div class="row">
+            <div class="col s1 push-s9 push-l10">
+              <!-- Modal Trigger -->
+              <button data-target="modal{{session.slug}}" class="btn modal-trigger">QR</button>
+            </div>
+            <div class="col s8 pull-s1">
+              <div class="card-title"><strong>{{session.name}}</strong></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col s10">
+
+              Date: {{session.start_datetime}}
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+            <a href="/sessions/{{session.slug}}/">View</a>
+            <a href="/sessions/{{session.slug}}/edit/">Edit</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="modal{{session.slug}}" class="modal">
+      <div class="modal-content">
+        <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
       </div>
     </div>
   {% endfor %}
@@ -25,10 +98,17 @@
   </a>
 </div>
 
+
+
 <script>
   document.addEventListener('DOMContentLoaded', function() {
     var elems_fab = document.querySelectorAll('.fixed-action-btn');
     var instances_fab = M.FloatingActionButton.init(elems_fab, {});
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_modal = document.querySelectorAll('.modal');
+    var instances_modal = M.Modal.init(elems_modal, {});
   });
 </script>
 {% endblock %}
