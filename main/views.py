@@ -13,7 +13,6 @@ from django.core.mail import EmailMessage
 from qr_code.qrcode.utils import QRCodeOptions
 from .utils import is_group, create_default_questionnaire
 
-# TODO: Add user group checks for relevant functionality (using decorators?)
 # TODO: Comment code
 # TODO: Create homepage dashboard view
 # TODO: Messages on completion of forms
@@ -89,7 +88,7 @@ def session(request, session_slug):
     dl_resources_url = '/sessions/{}/download/'.format(session.slug)
 
     if is_group(request.user, 'Tutors'):
-
+        # FIXME: Case where session.questionnaire is null for qr_url and questionnaire_url
         qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
         qr_url = 'http://192.168.0.29:8000/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
