@@ -10,11 +10,13 @@ def create_default_questionnaire(user):
     default_questionnaire.save()
 
     question_list = [
-                    ['The objectives for this session were identified and met.', 1],
-                    ['The delivery of this session was effective and clear.', 1],
-                    ['The correct level of background knowledge and experience was assumed for this session.', 1],
-                    ['The session was delivered in an appropriate teaching environment.', 1],
-                    ['Do you feel more confident on the subject?', 2],
+                    ['How well were the objectives of this session met?', 4],
+                    ['Please rate your knowledge before the session.', 4],
+                    ['Please rate your knowledge after the session.',4],
+                    ['Please rate the presentation skills of the instructor.', 4],
+                    ["Please rate the instructor's knowledge of the subject.", 4],
+                    ['The session was delivered at the appropriate level.', 1],
+                    ['The session was delivered in the appropriate teaching environment.', 1],
                     ['What was done well in this session?', 3],
                     ['What could be improved in future sessions?', 3],
                     ['Any other comments:', 3]

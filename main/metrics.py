@@ -1,4 +1,4 @@
-from .models import Session, LikertAnswer, YesNoAnswer
+from .models import Session, LikertAnswer, YesNoAnswer, FiveScaleAnswer
 
 class Metrics:
     '''Calculate metrics for given user'''
@@ -19,10 +19,15 @@ class Metrics:
 
     def rating(self,session):
 
+        fivescale_answers = FiveScaleAnswer.objects.filter(session=session)
         likert_answers = LikertAnswer.objects.filter(session=session)
         yesno_answers = YesNoAnswer.objects.filter(session=session)
 
         if likert_answers.count() + yesno_answers.count() > 0:
+            fivescale_score = 0
+            for answer in fivescale_answers:
+                fivescale_score += answer.answer
+
             likert_score = 0
             for answer in likert_answers:
                 likert_score += (5-answer.answer)/4
@@ -31,7 +36,7 @@ class Metrics:
             for answer in yesno_answers:
                 yesno_score += answer.answer
 
-            rating = int(100*(likert_score + yesno_score)/(likert_answers.count() + yesno_answers.count()))
+            rating = int(100*(fivescale_score + likert_score + yesno_score)/(fivescale_answers.count() + likert_answers.count() + yesno_answers.count()))
 
         else:
             rating = 'N/A'
