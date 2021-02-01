@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'aa@u_st&ls(0tspyu$!mlk&@f5(^!x1$_df@%v(t2bt9q_590t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['www.hone-app.co.uk']
 
 
 # Application definition
@@ -147,5 +147,5 @@ MEDIA_URL = '/media/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static'
 ]
-#STATIC_ROOT = '/home/armandrego/coffee/static/'
-MEDIA_ROOT = BASE_DIR / 'media'
+STATIC_ROOT = '/home/hone/COFFEE/static/'
+MEDIA_ROOT = '/home/hone/COFFEE/media/'
