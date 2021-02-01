@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer, Questionnaire, Session, Resource
+from .models import Question, LikertAnswer, YesNoAnswer, PlainTextAnswer, Questionnaire, Session, Resource, FiveScaleAnswer
 from bootstrap_datepicker_plus import DateTimePickerInput
 from django.contrib.admin.widgets import FilteredSelectMultiple
 
@@ -62,6 +62,15 @@ class PlainTextForm(forms.ModelForm):
         labels = {'answer':''}
 
 
+class FiveScaleForm(forms.ModelForm):
+
+    class Meta:
+        model = FiveScaleAnswer
+        fields = ('answer',)
+        widgets = {'answer':forms.Select(attrs={'class': 'browser-default'})}
+        labels = {'answer':''}
+
+
 class SessionForm(forms.ModelForm):
 
     # FIXME: Better multiple select widget for additional_tutors
@@ -96,3 +105,8 @@ class ResourceForm(forms.ModelForm):
         model = Resource
         fields = ('file',)
         widgets = {'file':forms.ClearableFileInput(attrs={'multiple':True})}
+
+
+class EmailForm(forms.Form):
+
+    email_address = forms.EmailField(required=False)

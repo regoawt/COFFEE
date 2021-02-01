@@ -27,7 +27,8 @@ class Question(models.Model):
 
     CATEGORY_CHOICES = ((1,'Likert'),
                         (2,'Yes/No'),
-                        (3,'Plain text'))
+                        (3,'Plain text'),
+                        (4,'1 to 5'))
 
     question = models.CharField(max_length=300)
     user = models.ForeignKey(User, on_delete=models.CASCADE, default=1)
@@ -38,7 +39,7 @@ class Question(models.Model):
     def __str__(self):
         return self.question
 
-
+# TODO: Change end_datetime to duration
 class Session(models.Model):
     '''Base session class'''
 
@@ -63,7 +64,8 @@ class Session(models.Model):
 
     # Overwrite save method for dynamic slug assignment
     def save(self, *args, **kwargs):
-        if self.slug == None:
+        # Check if slug already assigned
+        if not self.slug:
             self.slug = text.slugify(self.name+'-'+''.join(random.choices(string.ascii_uppercase + string.digits, k=10)))
         super(Session, self).save(*args, **kwargs)
 
@@ -95,8 +97,10 @@ class Answer(models.Model):
         linked_session = self.session
         if linked_session is not None:
             string = self.session.name + ' - ' + self.question.question
-        else:
+        elif self.question is not None:
             string = 'None' + ' - ' + self.question.question
+        else:
+            string = 'Undefined'
         return string
 
 class LikertAnswer(Answer):
@@ -121,3 +125,14 @@ class YesNoAnswer(Answer):
 class PlainTextAnswer(Answer):
 
     answer = models.CharField(max_length=500)
+
+
+class FiveScaleAnswer(Answer):
+
+    FIVESCALE_CHOICES = ((1,'1'),
+                        (2,'2'),
+                        (3,'3'),
+                        (4,'4'),
+                        (5,'5'))
+
+    answer = models.IntegerField(choices=FIVESCALE_CHOICES)

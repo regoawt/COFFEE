@@ -1,0 +1,15 @@
+{% extends 'main/header.html' %}
+
+{% block content %}
+<br>
+
+Enter your email address to receive the session resources download link.
+
+  <form method="POST">
+    {% csrf_token %}
+    {{ form }}
+    <p></p>
+    <button class="btn" type="submit">Submit</button>
+  </form>
+
+{% endblock %}

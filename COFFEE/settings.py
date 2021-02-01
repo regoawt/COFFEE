@@ -129,6 +129,16 @@ USE_TZ = True
 # Authentication
 LOGIN_URL = '/login/'
 
+# Email
+# TODO: Replace with correct values
+EMAIL_HOST = 'smtp.123-reg.co.uk'
+EMAIL_PORT = 465
+EMAIL_HOST_USER = 'info@hone-app.co.uk'
+EMAIL_HOST_PASSWORD = 'wehrok-pumWy5-wywrut'
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = True
+DEFAULT_FROM_EMAIL = 'info@hone-app.co.uk'
+
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
