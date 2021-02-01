@@ -26,7 +26,7 @@ class Metrics:
         if likert_answers.count() + yesno_answers.count() > 0:
             fivescale_score = 0
             for answer in fivescale_answers:
-                fivescale_score += answer.answer
+                fivescale_score += answer.answer/5
 
             likert_score = 0
             for answer in likert_answers:

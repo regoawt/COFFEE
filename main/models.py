@@ -124,7 +124,7 @@ class YesNoAnswer(Answer):
 
 class PlainTextAnswer(Answer):
 
-    answer = models.CharField(max_length=500)
+    answer = models.CharField(max_length=500, blank=True)
 
 
 class FiveScaleAnswer(Answer):
