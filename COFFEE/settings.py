@@ -22,9 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'aa@u_st&ls(0tspyu$!mlk&@f5(^!x1$_df@%v(t2bt9q_590t'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['www.hone-app.co.uk']
 
 
 # Application definition
