@@ -1,8 +1,15 @@
 # Utility functions called in app
 from .models import Questionnaire, Question
+from django.conf import settings
 
 def is_group(user, group):
     return user.groups.filter(name=group).exists()
+
+def get_domain():
+    if settings.DEBUG:
+        return 'http://192.168.1.123'
+    else:
+        return'http://www.hone-app.co.uk'
 
 def create_default_questionnaire(user):
 

@@ -11,7 +11,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from qr_code.qrcode.utils import QRCodeOptions
-from .utils import is_group, create_default_questionnaire
+from .utils import is_group, create_default_questionnaire, get_domain
 from datetime import datetime
 from .metrics import Metrics
 
@@ -23,6 +23,7 @@ def enter_email(request, session_slug):
     '''Enter email to be able to receive link to resources even as anonymous user'''
 
     session = Session.objects.get(slug=session_slug)
+    domain = get_domain()
     dl_resources_url = '/sessions/{}/download/'.format(session.slug)
 
     if request.method == 'POST':
@@ -31,7 +32,7 @@ def enter_email(request, session_slug):
         if email_form.is_valid():
             address = email_form.cleaned_data.get('email_address')
             subject = 'Link to download resources for {}'.format(session.name)
-            body = 'Thank you for completing the questionnaire. Please use the following link to access your resources http://www.hone-app.co.uk{}'.format(dl_resources_url)
+            body = 'Thank you for completing the questionnaire. Please use the following link to access your resources {}{}'.format(domain,dl_resources_url)
             message = EmailMessage(subject=subject,body=body,to=[address])
             message.send()
 
@@ -96,13 +97,14 @@ def download_resources(request, session_slug):
 def sessions(request):
     '''View all sessions'''
 
+    domain = get_domain()
     if is_group(request.user,'Tutors'):
         upcoming_sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now()).order_by('-start_datetime')
-        upcoming_qr_urls = ['http://www.hone-app.co.uk/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug) for session in upcoming_sessions]
+        upcoming_qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in upcoming_sessions]
         upcoming = zip(upcoming_sessions, upcoming_qr_urls)
 
         past_sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now()).order_by('-start_datetime')
-        past_qr_urls = ['http://www.hone-app.co.uk/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug) for session in past_sessions]
+        past_qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in past_sessions]
         past = zip(past_sessions, past_qr_urls)
 
         return render(request,
@@ -121,12 +123,13 @@ def session(request, session_slug):
     '''View session'''
 
     session = Session.objects.get(slug=session_slug)
+    domain = get_domain()
     dl_resources_url = '/sessions/{}/download/'.format(session.slug)
 
     if is_group(request.user, 'Tutors'):
         # FIXME: Case where session.questionnaire is null for qr_url and questionnaire_url
         qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
-        qr_url = 'http://www.hone-app.co.uk/sessions/{}/questionnaire/{}/'.format(session.slug,session.questionnaire.slug)
+        qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
         questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
         rating = Metrics(request.user).rating(session)
