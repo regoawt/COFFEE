@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+<div class="container">
 <form id="form-container" method="POST">
   {% csrf_token %}
   {% for question, answer_form in question_and_answer %}
@@ -12,4 +13,5 @@
   {% endfor %}
   <button type="submit" class="btn">Submit</button>
 </form>
+</div>
 {% endblock %}

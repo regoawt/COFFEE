@@ -11,9 +11,12 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from qr_code.qrcode.utils import QRCodeOptions
-from .utils import is_group, create_default_questionnaire, get_domain
+from .utils import is_group, create_default_questionnaire, get_domain, get_next_session
 from datetime import datetime
 from .metrics import Metrics
+from plotly.offline import plot
+import plotly.graph_objs as go
+import numpy as np
 
 # TODO: Comment code
 # TODO: Create homepage dashboard view
@@ -94,23 +97,26 @@ def download_resources(request, session_slug):
 
 # TODO: Include delete session button in card
 @login_required
-def sessions(request):
+def sessions(request, session_slug):
     '''View all sessions'''
 
     domain = get_domain()
     if is_group(request.user,'Tutors'):
-        upcoming_sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now()).order_by('-start_datetime')
-        upcoming_qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in upcoming_sessions]
-        upcoming = zip(upcoming_sessions, upcoming_qr_urls)
+        if session_slug == 'future':
+            sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now()).order_by('start_datetime')
+        elif session_slug == 'past':
+            sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now()).order_by('-start_datetime')
+        else:
+            return session(request, session_slug)
 
-        past_sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now()).order_by('-start_datetime')
-        past_qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in past_sessions]
-        past = zip(past_sessions, past_qr_urls)
+
+        qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in sessions]
+        zipped_data = zip(sessions, qr_urls)
 
         return render(request,
                         template_name='main/sessions.html',
-                        context={'upcoming':upcoming,
-                                    'past':past})
+                        context={'zipped_data':zipped_data,
+                                    'sessions':sessions})
 
     else:
         messages.error(request,'Students cannot access this area!')
@@ -132,7 +138,7 @@ def session(request, session_slug):
         qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
         questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
-        rating = Metrics(request.user).rating(session)
+        rating = Metrics(request.user,session=session).rating().mean().astype('int')
         print(rating)
 
         return render(request,
@@ -340,12 +346,26 @@ def home(request):
                       context={'attended_sessions':attended_sessions})
     else:
 
-        user_metrics = Metrics(request.user)
-        total_hours_taught = user_metrics.total_hours_taught()
-        print(total_hours_taught)
+        user_metrics = Metrics(request.user,time_period_unit='all_time')
+        hours_taught = user_metrics.hours_taught()
+        session_dates = [session.start_datetime for session in user_metrics.sessions]
+
+        fig = go.Figure()
+        fig.add_trace(go.Scatter(x=session_dates,y=hours_taught,
+                        opacity=0.8, marker_color='green'))
+        fig.update_yaxes(title_text='Hours taught')
+        plot_div = plot(fig,
+               output_type='div')
+
+        domain = get_domain()
+        next_session = get_next_session(request.user)
+        qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,next_session.slug,next_session.questionnaire.slug)
         return render(request = request,
                       template_name='main/home_tutors.html',
-                      context={'total_hours_taught':total_hours_taught})
+                      context={'hours_taught':hours_taught,
+                                'hours_plot':plot_div,
+                                'next_session':next_session,
+                                'qr_url':qr_url})
 
 
 def register(request):

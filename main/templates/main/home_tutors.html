@@ -1,5 +1,70 @@
 {% extends 'main/header.html' %}
+{% load static %}
+{% load qr_code %}
 
 {% block content %}
 
+<div class="row">
+  <div class="col l3 hide-on-small-only">
+    <h4 class="center-align">This is a test</h4>
+  </div>
+
+  <div class="col s12 m6 l6 ">
+    <h4>Next session</h4>
+      <div class="card">
+        <div class="card-content">
+          <div class="row">
+            <div class="col s1 push-s9 push-l10">
+              <!-- Modal Trigger -->
+              <button data-target="modal{{next_session.slug}}" class="btn modal-trigger">QR</button>
+            </div>
+            <div class="col s8 pull-s1">
+              <div class="card-title"><strong>{{next_session.name}}</strong></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col s10">
+
+              Date: {{next_session.start_datetime}}
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+            <a href="/sessions/{{next_session.slug}}/">View</a>
+            <a href="/sessions/{{next_session.slug}}/edit/">Edit</a>
+        </div>
+      </div>
+      <div class="divider"></div>
+      {% autoescape off %}
+      {{ hours_plot }}
+      {% endautoescape %}
+
+    <!-- Modal Structure -->
+    <div id="modal{{next_session.slug}}" class="modal">
+      <div class="modal-content">
+        <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+      </div>
+    </div>
+</div>
+
+  <div class="col l3 hide-on-small-only">
+  </div>
+
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_modal = document.querySelectorAll('.modal');
+    var instances_modal = M.Modal.init(elems_modal, {});
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_scrollspy = document.querySelectorAll('.scrollspy');
+    var instances_scrollspy = M.ScrollSpy.init(elems_scrollspy, {});
+  });
+</script>
 {% endblock %}

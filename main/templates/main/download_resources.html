@@ -2,7 +2,9 @@
 {% load static %}
 
 {% block content %}
+<div class="container">
 {% for resource in resources %}
   <p><a href='{{ resource.url }}' download>{{ resource.name }}</a></p>
 {% endfor %}
+</div>
 {% endblock %}

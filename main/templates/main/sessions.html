@@ -3,14 +3,15 @@
 {% load qr_code %}
 
 <!-- TODO: Implement scrollspy with table of contents -->
-<!-- IDEA: Try horizontal scroll table for upcoming sessions https://stackoverflow.com/questions/43741090/how-to-horizontally-scroll-through-columns-in-materialize-css -->
 {% block content %}
 
 <div class="row">
-  <h3 class="col ">Upcoming sessions</h3>
-  <br> <br> <br> <br> <br>
-  {% for session, qr_url in upcoming %}
-    <div class="col s12 m10 l8 ">
+  <div class="col l3 hide-on-small-only">
+    <h4 class="center-align">This is a test</h4>
+  </div>
+  <div class="col s12 m6 l6 ">
+  {% for session, qr_url in zipped_data %}
+    <div id="{{session.name}}" class="section scrollspy">
       <div class="card">
         <div class="card-content">
           <div class="row">
@@ -34,7 +35,6 @@
             <a href="/sessions/{{session.slug}}/edit/">Edit</a>
         </div>
       </div>
-    </div>
 
     <!-- Modal Structure -->
     <div id="modal{{session.slug}}" class="modal">
@@ -45,49 +45,17 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
       </div>
     </div>
+  </div>
   {% endfor %}
 </div>
 
-<div class="row">
-  <h3 class="col ">Past sessions</h3>
-  <br> <br> <br> <br> <br>
-  {% for session, qr_url in past %}
-    <div class="col s12 m10 l8 ">
-      <div class="card">
-        <div class="card-content">
-          <div class="row">
-            <div class="col s1 push-s9 push-l10">
-              <!-- Modal Trigger -->
-              <button data-target="modal{{session.slug}}" class="btn modal-trigger">QR</button>
-            </div>
-            <div class="col s8 pull-s1">
-              <div class="card-title"><strong>{{session.name}}</strong></div>
-            </div>
-          </div>
-          <div class="row">
-            <div class="col s10">
-
-              Date: {{session.start_datetime}}
-            </div>
-          </div>
-        </div>
-        <div class="card-action">
-            <a href="/sessions/{{session.slug}}/">View</a>
-            <a href="/sessions/{{session.slug}}/edit/">Edit</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- Modal Structure -->
-    <div id="modal{{session.slug}}" class="modal">
-      <div class="modal-content">
-        <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
-      </div>
-      <div class="modal-footer">
-        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
-      </div>
-    </div>
-  {% endfor %}
+  <div class="col l3 hide-on-small-only">
+    <ul class="section table-of-contents" style="position:fixed">
+      {% for session in sessions %}
+        <li><a href="#{{session.name}}">{{session.name}}</a></li>
+      {% endfor%}
+    </ul>
+  </div>
 </div>
 
 <div class="fixed-action-btn">
@@ -107,6 +75,11 @@
   document.addEventListener('DOMContentLoaded', function() {
     var elems_modal = document.querySelectorAll('.modal');
     var instances_modal = M.Modal.init(elems_modal, {});
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_scrollspy = document.querySelectorAll('.scrollspy');
+    var instances_scrollspy = M.ScrollSpy.init(elems_scrollspy, {});
   });
 </script>
 {% endblock %}

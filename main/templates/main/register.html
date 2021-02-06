@@ -1,9 +1,7 @@
 {% extends 'main/header.html' %}
 
 {% block content %}
-<br>
-
-Sign up to COFFEE
+<div class="container">
 
   <form method="POST">
     {% csrf_token %}
@@ -27,4 +25,5 @@ Sign up to COFFEE
   </form>
 
   <p></p>
+</div>
 {% endblock %}

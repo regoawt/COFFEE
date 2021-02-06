@@ -1,44 +1,91 @@
 from .models import Session, LikertAnswer, YesNoAnswer, FiveScaleAnswer
+from .utils import default_questionnaire
+from datetime import datetime
+import numpy as np
 
 class Metrics:
     '''Calculate metrics for given user'''
-
-    def __init__(self,user):
+# TODO: Pass third argument time period to give the relevant list for self.sessions
+    def __init__(self,user,session=None,time_period=1,time_period_unit='week'):
         self.user = user
-        self.sessions = Session.objects.filter(tutor=self.user)
 
-    def total_hours_taught(self):
+        # If no session is specified calculate period averages
+        if session == None:
+            if time_period_unit == 'day':
+                time_period_start = datetime.today() - datetime.timedelta(days=time_period)
+                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,
+                start_datetime__lt=datetime.now())
+            elif time_period_unit == 'week':
+                time_period_start = datetime.today() - datetime.timedelta(weeks=time_period)
+                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,
+                start_datetime__lt=datetime.now())
+            elif time_period_unit == 'month':
+                time_period_start = datetime.today() - datetime.timedelta(days=(time_period*31))
+                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,
+                start_datetime__lt=datetime.now())
+            elif time_period_unit == 'all_time':
+                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__lt=datetime.now())
+        else:
+            self.sessions = [session]
 
-        hours = 0
+
+        self.question_list = default_questionnaire()
+
+    def hours_taught(self):
+
+        hours = []
         for session in self.sessions:
             session_duration = session.end_datetime - session.start_datetime
             session_duration_hours = session_duration.total_seconds()/3600
-            hours += session_duration_hours
+            hours.append(session_duration_hours)
 
-        return hours
+        return np.asarray(hours)
 
-    def rating(self,session):
 
-        fivescale_answers = FiveScaleAnswer.objects.filter(session=session)
-        likert_answers = LikertAnswer.objects.filter(session=session)
-        yesno_answers = YesNoAnswer.objects.filter(session=session)
+    def rating(self):
 
-        if likert_answers.count() + yesno_answers.count() > 0:
-            fivescale_score = 0
-            for answer in fivescale_answers:
-                fivescale_score += answer.answer/5
+        rating = []
+        for session in self.sessions:
 
-            likert_score = 0
-            for answer in likert_answers:
-                likert_score += (5-answer.answer)/4
+            fivescale_answers = FiveScaleAnswer.objects.filter(session=session)
+            likert_answers = LikertAnswer.objects.filter(session=session)
+            yesno_answers = YesNoAnswer.objects.filter(session=session)
 
-            yesno_score = 0
-            for answer in yesno_answers:
-                yesno_score += answer.answer
+            total_num_answers = likert_answers.count() + yesno_answers.count() + fivescale_answers.count()
+            if total_num_answers > 0:
+                fivescale_score = 0
+                for answer in fivescale_answers:
+                    fivescale_score += answer.answer/5
 
-            rating = int(100*(fivescale_score + likert_score + yesno_score)/(fivescale_answers.count() + likert_answers.count() + yesno_answers.count()))
+                likert_score = 0
+                for answer in likert_answers:
+                    likert_score += (5-answer.answer)/4
 
-        else:
-            rating = 'N/A'
+                yesno_score = 0
+                for answer in yesno_answers:
+                    yesno_score += answer.answer
 
-        return rating
+                rating.append(int(100*(fivescale_score + likert_score + yesno_score)/(total_num_answers)))
+
+            else:
+                rating.append(np.nan)
+
+        return np.asarray(rating)
+
+
+    def objectives_met(self):
+
+        objectives_score = []
+        for session in self.sessions:
+
+            answers = FiveScaleAnswer.objects.filter(session=session,question=self.question_list[0][0])
+            if answers.count() > 0:
+                score = 0
+                for answer in answers:
+                    score += answer.answer/5
+
+                objectives_score.append(int(100*objectives_score/answers.count()))
+            else:
+                objectives_score.append(np.nan)
+
+        return np.asarray(objectives_score)

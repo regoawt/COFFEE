@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer, Session, Resource
+from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer, Session, Resource, FiveScaleAnswer
 
 # TODO: Show linked quetions under questionnaire in Admin
 # TODO: Admin action to change users' default questionnaire when updated
@@ -9,6 +9,7 @@ admin.site.register(Questionnaire)
 admin.site.register(LikertAnswer)
 admin.site.register(YesNoAnswer)
 admin.site.register(PlainTextAnswer)
+admin.site.register(FiveScaleAnswer)
 
 class ResourceAdmin(admin.StackedInline):
     model = Resource
