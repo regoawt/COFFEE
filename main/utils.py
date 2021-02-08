@@ -51,7 +51,12 @@ class Utils():
 
     def get_next_session(user):
 
-        next_session = Session.objects.filter(tutor=user,start_datetime__gt=datetime.now()).order_by('start_datetime')[0]
+        future_sessions = Session.objects.filter(tutor=user,start_datetime__gt=datetime.now()).order_by('start_datetime')
+
+        if future_sessions.count() > 0:
+            next_session = future_sessions[0]
+        else:
+            next_session = None
 
         return next_session
 
