@@ -8,16 +8,16 @@ import numpy as np
 
 class Utils():
 
-    def is_group(user, group):
+    def is_group(self,user, group):
         return user.groups.filter(name=group).exists()
 
-    def get_domain():
+    def get_domain(self):
         if settings.DEBUG:
             return 'http://192.168.1.123'
         else:
             return'http://www.hone-app.co.uk'
 
-    def get_default_questionnaire():
+    def get_default_questionnaire(self):
         question_list = [
                         ['How well were the objectives of this session met?', 4],
                         ['Please rate your knowledge before the session.', 4],
@@ -34,12 +34,12 @@ class Utils():
         return question_list
 
 
-    def create_default_questionnaire(user):
+    def create_default_questionnaire(self,user):
 
         default_questionnaire = Questionnaire(name='Default questionnaire', user=user)
         default_questionnaire.save()
 
-        question_list = get_default_questionnaire()
+        question_list = self.get_default_questionnaire()
 
         # FIXME: Should Question model have user attribute? All questions in default questionnaire will be
         # duplicated for every user. Do get or create first
@@ -49,7 +49,7 @@ class Utils():
             question_.questionnaire.add(default_questionnaire)
 
 
-    def get_next_session(user):
+    def get_next_session(self,user):
 
         future_sessions = Session.objects.filter(tutor=user,start_datetime__gt=datetime.now()).order_by('start_datetime')
 
@@ -61,7 +61,7 @@ class Utils():
         return next_session
 
 
-    def plotly_trace(x,y):
+    def plotly_trace(self,x,y):
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x,y=y,opacity=0.8, marker_color='green'))
         fig.update_yaxes(title_text='Hours taught')
@@ -71,7 +71,7 @@ class Utils():
         return plot_div
 
 
-    def find_plot_id(plot):
+    def find_plot_id(self,plot):
         start_index = plot.index('=')+2
         end_index = plot.index('class')-2
         id = plot[start_index:end_index]
