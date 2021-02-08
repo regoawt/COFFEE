@@ -47,6 +47,7 @@
         </ul>
 
     <!-- Modal Structure -->
+    {% if next_session is not None %}
     <div id="modal{{next_session.slug}}" class="modal">
       <div class="modal-content">
         <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
@@ -55,6 +56,7 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
       </div>
     </div>
+    {% endif %}
 </div>
 
   <div class="col l3 hide-on-small-only">
