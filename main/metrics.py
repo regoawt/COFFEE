@@ -28,16 +28,23 @@ class Metrics:
         else:
             self.sessions = [session]
 
-        self.session_dates = [session.start_datetime for session in self.sessions]
+        self.num_sessions = len(self.sessions)
+        if self.num_sessions > 0:
+            self.session_dates = [session.start_datetime for session in self.sessions]
+        else:
+            self.session_dates = None
         self.question_list = Utils.get_default_questionnaire()
 
     def hours_taught(self):
 
         hours = []
-        for session in self.sessions:
-            session_duration = session.end_datetime - session.start_datetime
-            session_duration_hours = session_duration.total_seconds()/3600
-            hours.append(session_duration_hours)
+        if self.num_sessions > 0:
+            for session in self.sessions:
+                session_duration = session.end_datetime - session.start_datetime
+                session_duration_hours = session_duration.total_seconds()/3600
+                hours.append(session_duration_hours)
+        else:
+            hours = [0]
 
         return np.asarray(hours)
 
@@ -45,31 +52,33 @@ class Metrics:
     def rating(self):
 
         rating = []
-        for session in self.sessions:
+        if self.num_sessions > 0:
+            for session in self.sessions:
 
-            fivescale_answers = FiveScaleAnswer.objects.filter(session=session)
-            likert_answers = LikertAnswer.objects.filter(session=session)
-            yesno_answers = YesNoAnswer.objects.filter(session=session)
+                fivescale_answers = FiveScaleAnswer.objects.filter(session=session)
+                likert_answers = LikertAnswer.objects.filter(session=session)
+                yesno_answers = YesNoAnswer.objects.filter(session=session)
 
-            total_num_answers = likert_answers.count() + yesno_answers.count() + fivescale_answers.count()
-            if total_num_answers > 0:
-                fivescale_score = 0
-                for answer in fivescale_answers:
-                    fivescale_score += answer.answer/5
+                total_num_answers = likert_answers.count() + yesno_answers.count() + fivescale_answers.count()
+                if total_num_answers > 0:
+                    fivescale_score = 0
+                    for answer in fivescale_answers:
+                        fivescale_score += answer.answer/5
 
-                likert_score = 0
-                for answer in likert_answers:
-                    likert_score += (5-answer.answer)/4
+                    likert_score = 0
+                    for answer in likert_answers:
+                        likert_score += (5-answer.answer)/4
 
-                yesno_score = 0
-                for answer in yesno_answers:
-                    yesno_score += answer.answer
+                    yesno_score = 0
+                    for answer in yesno_answers:
+                        yesno_score += answer.answer
 
-                rating.append(int(100*(fivescale_score + likert_score + yesno_score)/(total_num_answers)))
+                    rating.append(int(100*(fivescale_score + likert_score + yesno_score)/(total_num_answers)))
 
-            else:
-                rating.append(np.nan)
-
+                else:
+                    rating.append(np.nan)
+        else:
+            rating = [np.nan]
         return np.asarray(rating)
 
 
