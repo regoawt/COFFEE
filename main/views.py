@@ -143,8 +143,12 @@ def session(request, session_slug):
         qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
         questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
-        rating = Metrics(request.user,session=session).rating().mean().astype('int')
-        print(rating)
+        user_metrics = Metrics(request.user,session=session)
+
+        if np.isnan(user_metrics.rating()).all() == True:
+            rating = 'N/A'
+        else:
+            rating = np.nanmean(user_metrics.rating()).astype('int')
 
         return render(request,
                         template_name='main/session_tutors.html',
@@ -354,19 +358,17 @@ def home(request):
         user_metrics = Metrics(request.user,time_period_unit='all_time')
         hours_taught = user_metrics.hours_taught()
         session_dates = user_metrics.session_dates
-
-        left_bar = LeftBar(request.user)
-
         plot_div = Utils.plotly_trace(session_dates,hours_taught)
         id = Utils.find_plot_id(plot_div)
 
+        left_bar = LeftBar(request.user)
         domain = Utils.get_domain()
         next_session = Utils.get_next_session(request.user)
         if next_session is not None:
             qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,next_session.slug,next_session.questionnaire.slug)
         else:
             qr_url = None
-            
+
         return render(request = request,
                       template_name='main/home_tutors.html',
                       context={'hours_taught':hours_taught,
