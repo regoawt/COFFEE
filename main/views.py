@@ -11,12 +11,13 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.core.mail import EmailMessage
 from qr_code.qrcode.utils import QRCodeOptions
-from .utils import is_group, create_default_questionnaire, get_domain, get_next_session
+from .utils import Utils
 from datetime import datetime
 from .metrics import Metrics
-from plotly.offline import plot
+from plotly.io import to_html
 import plotly.graph_objs as go
 import numpy as np
+from .bar import LeftBar
 
 # TODO: Comment code
 # TODO: Create homepage dashboard view
@@ -26,7 +27,7 @@ def enter_email(request, session_slug):
     '''Enter email to be able to receive link to resources even as anonymous user'''
 
     session = Session.objects.get(slug=session_slug)
-    domain = get_domain()
+    domain = Utils.get_domain()
     dl_resources_url = '/sessions/{}/download/'.format(session.slug)
 
     if request.method == 'POST':
@@ -56,7 +57,7 @@ def enter_email(request, session_slug):
 def upload_resources(request, session_slug):
     '''Upload resources'''
 
-    if is_group(request.user,'Tutors'):
+    if Utils.is_group(request.user,'Tutors'):
         session = Session.objects.get(slug=session_slug)
 
         if request.method == 'POST':
@@ -100,8 +101,8 @@ def download_resources(request, session_slug):
 def sessions(request, session_slug):
     '''View all sessions'''
 
-    domain = get_domain()
-    if is_group(request.user,'Tutors'):
+    domain = Utils.get_domain()
+    if Utils.is_group(request.user,'Tutors'):
         if session_slug == 'future':
             sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now()).order_by('start_datetime')
         elif session_slug == 'past':
@@ -113,10 +114,14 @@ def sessions(request, session_slug):
         qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in sessions]
         zipped_data = zip(sessions, qr_urls)
 
+        left_bar = LeftBar(request.user)
+
         return render(request,
                         template_name='main/sessions.html',
                         context={'zipped_data':zipped_data,
-                                    'sessions':sessions})
+                                    'sessions':sessions,
+                                    'left_bar':left_bar
+                                    })
 
     else:
         messages.error(request,'Students cannot access this area!')
@@ -129,10 +134,10 @@ def session(request, session_slug):
     '''View session'''
 
     session = Session.objects.get(slug=session_slug)
-    domain = get_domain()
+    domain = Utils.get_domain()
     dl_resources_url = '/sessions/{}/download/'.format(session.slug)
 
-    if is_group(request.user, 'Tutors'):
+    if Utils.is_group(request.user, 'Tutors'):
         # FIXME: Case where session.questionnaire is null for qr_url and questionnaire_url
         qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
         qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug)
@@ -163,7 +168,7 @@ def session(request, session_slug):
 def edit_session(request, session_slug):
     '''Edit session'''
 
-    if is_group(request.user, 'Tutors'):
+    if Utils.is_group(request.user, 'Tutors'):
 
         session = Session.objects.get(slug=session_slug)
         if request.method == 'POST':
@@ -189,7 +194,7 @@ def edit_session(request, session_slug):
 def create_session(request):
     '''Create session'''
 
-    if is_group(request.user, 'Tutors'):
+    if Utils.is_group(request.user, 'Tutors'):
         if request.method == 'POST':
             session_form = SessionForm(request.POST, request.FILES, current_user=request.user)
 
@@ -298,7 +303,7 @@ def questionnaire(request, session_slug, questionnaire_slug):
 def create_questionnaire(request):
     '''Allow tutors to create new questionnaires.'''
 
-    if is_group(request.user, 'Tutors'):
+    if Utils.is_group(request.user, 'Tutors'):
         if request.method == 'POST':
             questionnaire_formset = QuestionModelFormSet(request.POST)
 
@@ -337,7 +342,7 @@ def create_questionnaire(request):
 @login_required
 def home(request):
 
-    if is_group(request.user, 'Students'):
+    if Utils.is_group(request.user, 'Students'):
 
         attended_sessions = Session.objects.filter(submitted_questionnaire=request.user).order_by('-start_datetime')
 
@@ -348,22 +353,22 @@ def home(request):
 
         user_metrics = Metrics(request.user,time_period_unit='all_time')
         hours_taught = user_metrics.hours_taught()
-        session_dates = [session.start_datetime for session in user_metrics.sessions]
+        session_dates = user_metrics.session_dates
 
-        fig = go.Figure()
-        fig.add_trace(go.Scatter(x=session_dates,y=hours_taught,
-                        opacity=0.8, marker_color='green'))
-        fig.update_yaxes(title_text='Hours taught')
-        plot_div = plot(fig,
-               output_type='div')
+        left_bar = LeftBar(request.user)
 
-        domain = get_domain()
-        next_session = get_next_session(request.user)
+        plot_div = Utils.plotly_trace(session_dates,hours_taught)
+        id = Utils.find_plot_id(plot_div)
+
+        domain = Utils.get_domain()
+        next_session = Utils.get_next_session(request.user)
         qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,next_session.slug,next_session.questionnaire.slug)
         return render(request = request,
                       template_name='main/home_tutors.html',
                       context={'hours_taught':hours_taught,
-                                'hours_plot':plot_div,
+                                'left_bar':left_bar,
+                                'plot_div':plot_div,
+                                'plot_id':id,
                                 'next_session':next_session,
                                 'qr_url':qr_url})
 
@@ -413,7 +418,7 @@ def select_group(request):
                 user.groups.add(group)
 
                 # Create default questionnaire
-                create_default_questionnaire(user)
+                Utils.create_default_questionnaire(user)
 
             elif account_type == 'student':
                 group = Group.objects.get(name='Students')

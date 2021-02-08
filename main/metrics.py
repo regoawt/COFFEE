@@ -1,5 +1,5 @@
 from .models import Session, LikertAnswer, YesNoAnswer, FiveScaleAnswer
-from .utils import default_questionnaire
+from .utils import Utils
 from datetime import datetime
 import numpy as np
 
@@ -28,8 +28,8 @@ class Metrics:
         else:
             self.sessions = [session]
 
-
-        self.question_list = default_questionnaire()
+        self.session_dates = [session.start_datetime for session in self.sessions]
+        self.question_list = Utils.get_default_questionnaire()
 
     def hours_taught(self):
 

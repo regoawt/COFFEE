@@ -5,9 +5,7 @@
 {% block content %}
 
 <div class="row">
-  <div class="col l3 hide-on-small-only">
-    <h4 class="center-align">This is a test</h4>
-  </div>
+  {% include 'main/left_bar.html'%}
 
   <div class="col s12 m6 l6 ">
     <h4>Next session</h4>
@@ -35,9 +33,16 @@
         </div>
       </div>
       <div class="divider"></div>
-      {% autoescape off %}
-      {{ hours_plot }}
-      {% endautoescape %}
+        <ul class="collapsible">
+          <li>
+            <div id="c-header" class="collapsible-header">Hours</div>
+            <div class="collapsible-body">
+              {% autoescape off %}
+              {{ plot_div }}
+              {% endautoescape %}
+            </div>
+          </li>
+        </ul>
 
     <!-- Modal Structure -->
     <div id="modal{{next_session.slug}}" class="modal">
@@ -51,6 +56,17 @@
 </div>
 
   <div class="col l3 hide-on-small-only">
+    <div class="outer" style="position:fixed">
+      <div class="inner" style="position:absolute top">
+        <img src='{% static 'main/images/example_ad.png' %}' width="80%"/>
+      </div>
+      <style media="screen">
+      .inner {
+        margin-left: 20px;
+        width: 100%; /* Depending on the desired effect, width might be needed */
+      }
+      </style>
+    </div>
   </div>
 
 </div>
@@ -66,5 +82,19 @@
     var elems_scrollspy = document.querySelectorAll('.scrollspy');
     var instances_scrollspy = M.ScrollSpy.init(elems_scrollspy, {});
   });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_collapsible = document.querySelectorAll('.collapsible');
+    var instances_collapsible = M.Collapsible.init(elems_collapsible, {});
+  });
+
+  document.getElementById("c-header").addEventListener("click", function() {
+    var update = {
+      title: 'Test'
+    }
+    var parent = document.getElementById('{{plot_id}}').parentNode;
+    Plotly.Plots.resize('{{plot_id}}');
+  });
+
 </script>
 {% endblock %}
