@@ -8,6 +8,7 @@
   {% include 'main/left_bar.html'%}
 
   <div class="col s12 m6 l6 ">
+    {% if next_session is not None %}
     <h4>Next session</h4>
       <div class="card">
         <div class="card-content">
@@ -33,6 +34,7 @@
         </div>
       </div>
       <div class="divider"></div>
+      {% endif %}
         <ul class="collapsible">
           <li>
             <div id="c-header" class="collapsible-header">Hours</div>
@@ -45,6 +47,7 @@
         </ul>
 
     <!-- Modal Structure -->
+    {% if next_session is not None %}
     <div id="modal{{next_session.slug}}" class="modal">
       <div class="modal-content">
         <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
@@ -53,6 +56,7 @@
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
       </div>
     </div>
+    {% endif %}
 </div>
 
   <div class="col l3 hide-on-small-only">

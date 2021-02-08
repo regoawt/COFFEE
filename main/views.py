@@ -362,7 +362,11 @@ def home(request):
 
         domain = Utils.get_domain()
         next_session = Utils.get_next_session(request.user)
-        qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,next_session.slug,next_session.questionnaire.slug)
+        if next_session is not None:
+            qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,next_session.slug,next_session.questionnaire.slug)
+        else:
+            qr_url = None
+            
         return render(request = request,
                       template_name='main/home_tutors.html',
                       context={'hours_taught':hours_taught,
