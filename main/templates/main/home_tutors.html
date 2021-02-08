@@ -1,5 +1,100 @@
 {% extends 'main/header.html' %}
+{% load static %}
+{% load qr_code %}
 
 {% block content %}
 
+<div class="row">
+  {% include 'main/left_bar.html'%}
+
+  <div class="col s12 m6 l6 ">
+    <h4>Next session</h4>
+      <div class="card">
+        <div class="card-content">
+          <div class="row">
+            <div class="col s1 push-s9 push-l10">
+              <!-- Modal Trigger -->
+              <button data-target="modal{{next_session.slug}}" class="btn modal-trigger">QR</button>
+            </div>
+            <div class="col s8 pull-s1">
+              <div class="card-title"><strong>{{next_session.name}}</strong></div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col s10">
+
+              Date: {{next_session.start_datetime}}
+            </div>
+          </div>
+        </div>
+        <div class="card-action">
+            <a href="/sessions/{{next_session.slug}}/">View</a>
+            <a href="/sessions/{{next_session.slug}}/edit/">Edit</a>
+        </div>
+      </div>
+      <div class="divider"></div>
+        <ul class="collapsible">
+          <li>
+            <div id="c-header" class="collapsible-header">Hours</div>
+            <div class="collapsible-body">
+              {% autoescape off %}
+              {{ plot_div }}
+              {% endautoescape %}
+            </div>
+          </li>
+        </ul>
+
+    <!-- Modal Structure -->
+    <div id="modal{{next_session.slug}}" class="modal">
+      <div class="modal-content">
+        <p class="center-align"><img src="{% qr_url_from_text qr_url %}"></p>
+      </div>
+      <div class="modal-footer">
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+      </div>
+    </div>
+</div>
+
+  <div class="col l3 hide-on-small-only">
+    <div class="outer" style="position:fixed">
+      <div class="inner" style="position:absolute top">
+        <img src='{% static 'main/images/example_ad.png' %}' width="80%"/>
+      </div>
+      <style media="screen">
+      .inner {
+        margin-left: 20px;
+        width: 100%; /* Depending on the desired effect, width might be needed */
+      }
+      </style>
+    </div>
+  </div>
+
+</div>
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_modal = document.querySelectorAll('.modal');
+    var instances_modal = M.Modal.init(elems_modal, {});
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_scrollspy = document.querySelectorAll('.scrollspy');
+    var instances_scrollspy = M.ScrollSpy.init(elems_scrollspy, {});
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_collapsible = document.querySelectorAll('.collapsible');
+    var instances_collapsible = M.Collapsible.init(elems_collapsible, {});
+  });
+
+  document.getElementById("c-header").addEventListener("click", function() {
+    var update = {
+      title: 'Test'
+    }
+    var parent = document.getElementById('{{plot_id}}').parentNode;
+    Plotly.Plots.resize('{{plot_id}}');
+  });
+
+</script>
 {% endblock %}

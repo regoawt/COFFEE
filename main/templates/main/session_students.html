@@ -3,6 +3,7 @@
 {% load qr_code %}
 
 {% block content %}
+<div class="container">
 <br>
 
 <h3>{{session.name}}</h3>
@@ -10,4 +11,5 @@
 <p style="font-size:70%">Tutor: <strong>{{session.tutor.first_name}} {{session.tutor.last_name}}</strong></p>
 <p><a href='{{dl_resources_url}}'>Download resources</a></p>
 
+</div>
 {% endblock %}

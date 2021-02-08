@@ -3,6 +3,7 @@
 {% load qr_code %}
 
 {% block content %}
+<div class="container">
 <br>
 
 <h3>{{session.name}}</h3>
@@ -12,5 +13,5 @@
 <p><a href='{{questionnaire_url}}'>Questionnaire (test feature)</a></p>
 <p>Rating: {{rating}}</p>
 <p><img src="{% qr_url_from_text qr_url %}"></p>
-
+</div>
 {% endblock %}

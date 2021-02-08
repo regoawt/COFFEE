@@ -1,6 +1,7 @@
 {% extends 'main/header.html' %}
 
 {% block content %}
+<div class="container">
 <br>
 
 Enter your username and password to log in to NHS COFFEE.
@@ -13,4 +14,5 @@ Enter your username and password to log in to NHS COFFEE.
   </form>
 
   If you do not already have an account, <a href="{% url 'main:register' %}"><strong>register</strong></a> instead.
+</div>
 {% endblock %}
