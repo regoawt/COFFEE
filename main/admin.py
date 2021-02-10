@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from .models import Question, Questionnaire, LikertAnswer, YesNoAnswer, PlainTextAnswer, Session, Resource, FiveScaleAnswer
 from .utils import Utils
 
-# TODO: Show linked quetions under questionnaire in Admin
-# TODO: Admin action to change users' default questionnaire when updated
+# TODO: Show linked questions under questionnaire in Admin
+# FIXME: AA - update_default_questionnaire instead of delete, change old default name e.g 'Default questionnaire (archived - *date*)'
 
 def update_default_questionnaire(modeladmin,request,queryset):
     for user in queryset:

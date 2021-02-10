@@ -5,7 +5,7 @@ import numpy as np
 
 class Metrics:
     '''Calculate metrics for given user'''
-# TODO: Pass third argument time period to give the relevant list for self.sessions
+
     def __init__(self,user,session=None,time_period=1,time_period_unit='week'):
         self.user = user
 
@@ -35,6 +35,26 @@ class Metrics:
             self.session_dates = None
         self.question_list = Utils.get_default_questionnaire()
 
+
+    def na_check(self,metric):
+        '''Check if all values in metric array are NaNs'''
+
+        if np.isnan(np.asarray(metric)).all() == True:
+            return 'N/A'
+        else:
+            return metric
+
+
+    # Define av and sum funcs
+    def average(self):
+        '''Average of output metric including N/A check'''
+
+        if self.value is not 'N/A':
+            self.value = np.nanmean(self.value).astype('int')
+
+        return self
+
+# TODO: AA - add self.title attributes
     def hours_taught(self):
 
         hours = []
@@ -46,7 +66,9 @@ class Metrics:
         else:
             hours = [0]
 
-        return np.asarray(hours)
+        self.value = np.asarray(hours)
+
+        return self
 
 
     def rating(self):
@@ -54,7 +76,6 @@ class Metrics:
         rating = []
         if self.num_sessions > 0:
             for session in self.sessions:
-
                 fivescale_answers = FiveScaleAnswer.objects.filter(session=session)
                 likert_answers = LikertAnswer.objects.filter(session=session)
                 yesno_answers = YesNoAnswer.objects.filter(session=session)
@@ -77,24 +98,52 @@ class Metrics:
 
                 else:
                     rating.append(np.nan)
+            self.value = self.na_check(rating)
         else:
-            rating = [np.nan]
-        return np.asarray(rating)
+            self.value = 'N/A'
+
+        return self
 
 
-    def objectives_met(self):
+    def objectives(self):
 
         objectives_score = []
-        for session in self.sessions:
+        if self.num_sessions > 0:
+            for session in self.sessions:
+                answers = LikertAnswer.objects.filter(session=session,question__question=self.question_list[0][0])
+                if answers.count() > 0:
+                    score = 0
+                    for answer in answers:
+                        score += (5-answer.answer)/4
 
-            answers = FiveScaleAnswer.objects.filter(session=session,question=self.question_list[0][0])
-            if answers.count() > 0:
+                    objectives_score.append(int(100*score/answers.count()))
+                else:
+                    objectives_score.append(np.nan)
+            self.value = self.na_check(objectives_score)
+        else:
+            self.value = 'N/A'
+
+        return self
+
+
+    def effectiveness(self):
+
+        effectiveness_score = []
+        if self.num_sessions > 0:
+            for session in self.sessions:
                 score = 0
-                for answer in answers:
-                    score += answer.answer/5
+                count = 0
+                if session.submitted_questionnaire.count() > 0:
+                    for user in session.submitted_questionnaire:
+                        answer_before = FiveScaleAnswer.objects.get(session=session,question__question=self.question_list[1][0],user=user)
+                        answer_after = FiveScaleAnswer.objects.get(session=session,question__question=self.question_list[2][0],user=user)
+                        score += (answer_after-answer_before)/5
+                        count += 1
+                    effectiveness_score.append(int(100*score/count))
+                else:
+                    effectiveness_score.append(np.nan)
+            self.value = self.na_check(effectiveness_score)
+        else:
+            self.value = 'N/A'
 
-                objectives_score.append(int(100*objectives_score/answers.count()))
-            else:
-                objectives_score.append(np.nan)
-
-        return np.asarray(objectives_score)
+        return self

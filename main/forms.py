@@ -82,7 +82,7 @@ class SessionForm(forms.ModelForm):
     #     js = ('/admin/jsi18n',)
 
     class Meta:
-        # TODO: DateTime picker input format to British
+        # TODO: AA - DateTime picker input format to British
         model =  Session
         fields = ('name','start_datetime','end_datetime','type','additional_tutors','questionnaire')
         widgets = {'start_datetime': DateTimePickerInput(),

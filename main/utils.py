@@ -19,7 +19,7 @@ class Utils:
 
     def get_default_questionnaire():
         question_list = [
-                        ['How well were the objectives of this session met?', 4],
+                        ['The objectives of this session were met.', 1],
                         ['Please rate your knowledge before the session.', 4],
                         ['Please rate your knowledge after the session.',4],
                         ['Please rate the presentation skills of the instructor.', 4],
@@ -61,10 +61,17 @@ class Utils:
         return next_session
 
 
-    def plotly_trace(x,y):
+    def plotly_multitrace(x,traces,titles):
+        plots = []
+        for i in range(len(traces)):
+            plots.append(Utils.plotly_trace(x,traces[i],titles[i]))
+
+        return plots
+
+    def plotly_trace(x,y,title):
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=x,y=y,opacity=0.8, marker_color='green'))
-        fig.update_yaxes(title_text='Hours taught')
+        fig.update_yaxes(title_text=title)
         fig.update_layout(autosize=True,height=400)
         plot_div = to_html(fig,include_plotlyjs=False,full_html=False)
 

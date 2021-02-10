@@ -20,8 +20,10 @@ import numpy as np
 from .bar import LeftBar
 
 # TODO: Comment code
-# TODO: Create homepage dashboard view
+# TODO: AA - Create homepage dashboard view
 # TODO: Messages on completion of forms
+# TODO: AA - Footer
+# TODO: AA - Mobile nav glitchy link
 
 def enter_email(request, session_slug):
     '''Enter email to be able to receive link to resources even as anonymous user'''
@@ -96,7 +98,7 @@ def download_resources(request, session_slug):
                     template_name='main/download_resources.html',
                     context={'resources':resources})
 
-# TODO: Include delete session button in card
+# TODO: AA - Include delete session button in card
 @login_required
 def sessions(request, session_slug):
     '''View all sessions'''
@@ -114,7 +116,7 @@ def sessions(request, session_slug):
         qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in sessions]
         zipped_data = zip(sessions, qr_urls)
 
-        left_bar = LeftBar(request.user)
+        left_bar = LeftBar(request.user,time_period='all_time')
 
         return render(request,
                         template_name='main/sessions.html',
@@ -138,17 +140,14 @@ def session(request, session_slug):
     dl_resources_url = '/sessions/{}/download/'.format(session.slug)
 
     if Utils.is_group(request.user, 'Tutors'):
-        # FIXME: Case where session.questionnaire is null for qr_url and questionnaire_url
+        # FIXME: AA - Case where session.questionnaire is null for qr_url and questionnaire_url
         qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
         qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
         questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
         user_metrics = Metrics(request.user,session=session)
-
-        if np.isnan(user_metrics.rating()).all() == True:
-            rating = 'N/A'
-        else:
-            rating = np.nanmean(user_metrics.rating()).astype('int')
+        rating = user_metrics.rating().average().value
+        left_bar = LeftBar(request.user,session=session)
 
         return render(request,
                         template_name='main/session_tutors.html',
@@ -158,7 +157,8 @@ def session(request, session_slug):
                                     'resource_form_url':resource_form_url,
                                     'dl_resources_url':dl_resources_url,
                                     'questionnaire_url':questionnaire_url,
-                                    'rating':rating})
+                                    'rating':rating,
+                                    'left_bar':left_bar})
 
     else:
 
@@ -355,13 +355,25 @@ def home(request):
                       context={'attended_sessions':attended_sessions})
     else:
 
+        # TODO: AA - Combine default questionnaire plots into one Metric method
         user_metrics = Metrics(request.user,time_period_unit='all_time')
-        hours_taught = user_metrics.hours_taught()
+        hours_taught = user_metrics.hours_taught().value
         session_dates = user_metrics.session_dates
-        plot_div = Utils.plotly_trace(session_dates,hours_taught)
-        id = Utils.find_plot_id(plot_div)
 
-        left_bar = LeftBar(request.user)
+        objective_score = user_metrics.objectives().value
+        rating = user_metrics.rating().value
+        print(rating)
+
+        plot_titles = ['Hours taught','Rating']
+        plots = Utils.plotly_multitrace(session_dates,[hours_taught,rating],plot_titles)
+        plot_data = zip(plots,plot_titles)
+        plot_ids = []
+        for plot in plots:
+            plot_ids.append(Utils.find_plot_id(plot))
+
+        print(plot_ids)
+
+        left_bar = LeftBar(request.user,time_period='all_time')
         domain = Utils.get_domain()
         next_session = Utils.get_next_session(request.user)
         if next_session is not None:
@@ -373,8 +385,8 @@ def home(request):
                       template_name='main/home_tutors.html',
                       context={'hours_taught':hours_taught,
                                 'left_bar':left_bar,
-                                'plot_div':plot_div,
-                                'plot_id':id,
+                                'plot_data':plot_data,
+                                'plot_ids':plot_ids,
                                 'next_session':next_session,
                                 'qr_url':qr_url})
 

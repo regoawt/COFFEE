@@ -35,15 +35,18 @@
       </div>
       <div class="divider"></div>
       {% endif %}
-        <ul class="collapsible">
+      <h5>Charts</h5>
+        <ul class="collapsible expandable">
+          {% for plot, title in plot_data %}
           <li>
-            <div id="c-header" class="collapsible-header">Hours</div>
+            <div class="collapsible-header">{{title}}</div>
             <div class="collapsible-body">
               {% autoescape off %}
-              {{ plot_div }}
+              {{ plot }}
               {% endautoescape %}
             </div>
           </li>
+          {% endfor %}
         </ul>
 
     <!-- Modal Structure -->
@@ -88,17 +91,24 @@
   });
 
   document.addEventListener('DOMContentLoaded', function() {
-    var elems_collapsible = document.querySelectorAll('.collapsible');
-    var instances_collapsible = M.Collapsible.init(elems_collapsible, {});
+    var elems_collapsible = document.querySelectorAll('.collapsible.expandable');
+    var instances_collapsible = M.Collapsible.init(elems_collapsible, {
+      accordion: false
+    });
   });
 
-  document.getElementById("c-header").addEventListener("click", function() {
-    var update = {
-      title: 'Test'
-    }
-    var parent = document.getElementById('{{plot_id}}').parentNode;
-    Plotly.Plots.resize('{{plot_id}}');
-  });
+  var c_headers = document.querySelectorAll('div.collapsible-header');
+  var plotIDs = {{plot_ids|safe}};
+
+  for (var i = 0; i < c_headers.length; i++) {
+      (function() {
+        var plotID = String(plotIDs[i]);
+        c_headers[i].addEventListener("click", function() {
+          Plotly.Plots.resize(plotID);
+        });
+      }());
+  };
+
 
 </script>
 {% endblock %}

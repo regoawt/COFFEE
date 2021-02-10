@@ -3,15 +3,34 @@
 {% load qr_code %}
 
 {% block content %}
-<div class="container">
-<br>
+<div class="row">
+  {% include 'main/left_bar.html'%}
 
-<h3>{{session.name}}</h3>
-<p style="font-size:70%">Date: <strong>{{session.start_datetime}}</strong></p>
-<p><a href='{{resource_form_url}}'>Add resources</a></p>
-<p><a href='{{dl_resources_url}}'>Download resources (test feature)</a></p>
-<p><a href='{{questionnaire_url}}'>Questionnaire (test feature)</a></p>
-<p>Rating: {{rating}}</p>
-<p><img src="{% qr_url_from_text qr_url %}"></p>
+  <div class="col s12 m6 l6 ">
+    <h4>{{session.name}}</h4>
+    <p>Date: <strong>{{session.start_datetime}}</strong></p>
+    <p><a href='{{resource_form_url}}'>Add resources</a></p>
+    <p><a href='{{dl_resources_url}}'>Download resources (test feature)</a></p>
+    <p><a href='{{questionnaire_url}}'>Questionnaire (test feature)</a></p>
+  </div>
+
+  <div class="col l3 hide-on-small-only">
+      <div class="outer" style="position:fixed">
+        {% include 'main/advert.html' %}
+        <div class="inner" style="position:absolute">
+          <ul class="section table-of-contents" >
+            {% for session in sessions %}
+              <li><a href="#{{session.name}}">{{session.name}}</a></li>
+            {% endfor%}
+          </ul>
+        </div>
+        <style media="screen">
+        .inner {
+          margin-left: 20px;
+          width: 100%; /* Depending on the desired effect, width might be needed */
+        }
+        </style>
+      </div>
+  </div>
 </div>
 {% endblock %}
