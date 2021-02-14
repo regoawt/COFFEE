@@ -105,11 +105,11 @@ class Answer(models.Model):
 
 class LikertAnswer(Answer):
 
-    LIKERT_CHOICES = ((1,'Strongly agree'),
-                        (2,'Agree'),
+    LIKERT_CHOICES = ((1,'Strongly disagree'),
+                        (2,'Disagree'),
                         (3,'Neutral'),
-                        (4,'Disagree'),
-                        (5,'Strongly disagree'))
+                        (4,'Agree'),
+                        (5,'Strongly agree'))
 
     answer = models.IntegerField(choices=LIKERT_CHOICES)
 

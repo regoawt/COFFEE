@@ -7,11 +7,30 @@
   {% include 'main/left_bar.html'%}
 
   <div class="col s12 m6 l6 ">
-    <h4>{{session.name}}</h4>
-    <p>Date: <strong>{{session.start_datetime}}</strong></p>
-    <p><a href='{{resource_form_url}}'>Add resources</a></p>
-    <p><a href='{{dl_resources_url}}'>Download resources (test feature)</a></p>
-    <p><a href='{{questionnaire_url}}'>Questionnaire (test feature)</a></p>
+    <h5>{{session.name}}</h5>
+    Date: <strong>{{session.start_datetime}}</strong>
+    <div class="divider"></div>
+
+    <p><a href='{{resource_form_url}}'><button class="btn">Add resources</button></a></p>
+    <p><a href='{{dl_resources_url}}'><button class="btn">Download resources</button></a></p>
+    <p><a href='{{questionnaire_url}}'><button class="btn">View questionnaire</button></a></p>
+
+    {% if plot_data is not None %}
+    <h5>Charts</h5>
+      <ul class="collapsible expandable">
+
+        {% for plot, title in plot_data %}
+        <li>
+          <div class="collapsible-header">{{title}}</div>
+          <div class="collapsible-body">
+            {% autoescape off %}
+            {{ plot }}
+            {% endautoescape %}
+          </div>
+        </li>
+        {% endfor %}
+        {% endif %}
+      </ul>
   </div>
 
   <div class="col l3 hide-on-small-only">
@@ -33,4 +52,25 @@
       </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_collapsible = document.querySelectorAll('.collapsible.expandable');
+    var instances_collapsible = M.Collapsible.init(elems_collapsible, {
+      accordion: false
+    });
+  });
+
+  var c_headers = document.querySelectorAll('div.collapsible-header');
+  var plotIDs = {{plot_ids|safe}};
+
+  for (var i = 0; i < c_headers.length; i++) {
+      (function() {
+        var plotID = String(plotIDs[i]);
+        c_headers[i].addEventListener("click", function() {
+          Plotly.Plots.resize(plotID);
+        });
+      }());
+  };
+</script>
 {% endblock %}

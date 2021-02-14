@@ -1,19 +1,64 @@
 {% extends 'main/header.html' %}
+{% load static %}
 
 {% block content %}
 <div class="row">
+  {% include 'main/left_bar_students.html'%}
+
+  <div class="col s12 m6 l6 ">
+    <br>
+    <h5>Welcome back <strong>{{request.user}}</strong></h5>
+    <div class="divider"></div>
     {% for session in attended_sessions %}
-        <div class="col s12 m6 l2">
-            <a href="/sessions/{{session.slug}}" class="custom-card">
-                <div class="card hoverable">
-                    <div class="card-content">
-                        <div class="card-title"><strong>{{session.name}}</strong></div>
-                        <p>Date: {{session.start_datetime}}</p>
-                        <p>Tutor: {{session.tutor.first_name}} {{session.tutor.last_name}}</p>
-                    </div>
-                </div>
-            </a>
+      <div id="{{session.name}}" class="section scrollspy">
+        <div class="card">
+          <div class="card-content">
+            <div class="row">
+              <div class="col s8">
+                <div class="card-title"><strong>{{session.name}}</strong></div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col s10">
+                <p>Date: <strong>{{session.start_datetime}}</strong></p>
+                <p>Tutor: <strong>{{session.tutor.first_name}} {{session.tutor.last_name}}</strong></p>
+              </div>
+            </div>
+          </div>
+          <div class="card-action">
+            <a href="/sessions/{{session.slug}}/">View</a>
+          </div>
         </div>
+      </div>
     {% endfor %}
+  </div>
+
+  <div class="col l3 hide-on-small-only">
+      <div class="outer" style="position:fixed">
+        {% include 'main/advert.html' %}
+        <div class="inner" style="position:absolute">
+          <ul class="section table-of-contents" >
+            {% for session in attended_sessions %}
+              <li><a href="#{{session.name}}">{{session.name}}</a></li>
+            {% endfor%}
+          </ul>
+        </div>
+        <style media="screen">
+        .inner {
+          margin-left: 20px;
+          width: 100%; /* Depending on the desired effect, width might be needed */
+        }
+        </style>
+      </div>
+  </div>
 </div>
+
+
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_scrollspy = document.querySelectorAll('.scrollspy');
+    var instances_scrollspy = M.ScrollSpy.init(elems_scrollspy, {});
+  });
+</script>
 {% endblock %}

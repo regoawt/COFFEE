@@ -9,7 +9,8 @@ from .utils import Utils
 
 def update_default_questionnaire(modeladmin,request,queryset):
     for user in queryset:
-        if Utils.is_group(user,'tutor'):
+        if Utils.is_group(user,'Tutors'):
+
             old_questionnaire = Questionnaire.objects.get(name='Default questionnaire',user=user)
             old_questionnaire.delete()
 

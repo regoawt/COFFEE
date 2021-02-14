@@ -13,7 +13,7 @@ class Utils:
 
     def get_domain():
         if settings.DEBUG:
-            return 'http://192.168.1.123'
+            return 'http://192.168.1.123:8000'
         else:
             return'http://www.hone-app.co.uk'
 
@@ -61,18 +61,41 @@ class Utils:
         return next_session
 
 
-    def plotly_multitrace(x,traces,titles):
+    def get_default_questionnaire_traces(user,metrics):
+        question_list = Utils.get_default_questionnaire()
+        traces = []
+        titles = []
+        bar_names = []
+        for q in question_list:
+            question = Question.objects.get(question=q[0],user=user,questionnaire__name='Default questionnaire')
+            if question.question_category != 3:     # Filter out plain text questions
+                question_response = metrics.responses(question)
+                traces.append(question_response.value)
+                titles.append(question_response.title)
+                bar_names.append(question_response.bar_names)
+        return traces,titles,bar_names
+
+    def plotly_multitrace(x,traces,titles,bar_names):
         plots = []
         for i in range(len(traces)):
-            plots.append(Utils.plotly_trace(x,traces[i],titles[i]))
+            plots.append(Utils.plotly_trace(x,traces[i],titles[i],bar_names[i]))
 
         return plots
 
-    def plotly_trace(x,y,title):
+    def plotly_trace(x,y,title,bar_name):
+        y_array = np.array(y)
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=x,y=y,opacity=0.8, marker_color='green'))
-        fig.update_yaxes(title_text=title)
-        fig.update_layout(autosize=True,height=400)
+        if np.shape(y)[0] > 1:
+            for i in range(np.shape(y)[1]):
+                bar_stack_y = y_array[:,i]
+                fig.add_trace(go.Bar(name=bar_name[i],x=x,y=bar_stack_y,opacity=0.8))
+            fig.update_layout(autosize=True,height=400,barmode='stack')
+            fig.update_layout(legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1,font=dict(
+            size=10
+            )))
+        else:
+            fig.add_trace(go.Bar(x=bar_name,y=y_array[0],opacity=0.8))
+            fig.update_layout(autosize=True,height=400)
         plot_div = to_html(fig,include_plotlyjs=False,full_html=False)
 
         return plot_div

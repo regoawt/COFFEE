@@ -20,7 +20,6 @@ import numpy as np
 from .bar import LeftBar
 
 # TODO: Comment code
-# TODO: AA - Create homepage dashboard view
 # TODO: Messages on completion of forms
 # TODO: AA - Footer
 # TODO: AA - Mobile nav glitchy link
@@ -94,11 +93,13 @@ def download_resources(request, session_slug):
     '''Download resources'''
 
     resources = [resource.file for resource in list(Resource.objects.filter(session__slug=session_slug))]
+    if len(resources) == 0:
+        resources = None
     return render(request,
                     template_name='main/download_resources.html',
                     context={'resources':resources})
 
-# TODO: AA - Include delete session button in card
+
 @login_required
 def sessions(request, session_slug):
     '''View all sessions'''
@@ -126,9 +127,10 @@ def sessions(request, session_slug):
                                     })
 
     else:
-        messages.error(request,'Students cannot access this area!')
-
-        return redirect('main:home')
+        if session_slug == 'future' or session_slug == 'past':
+            return redirect('main:home')
+        else:
+            return session(request,session_slug)
 
 
 @login_required
@@ -146,8 +148,15 @@ def session(request, session_slug):
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
         questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
         user_metrics = Metrics(request.user,session=session)
-        rating = user_metrics.rating().average().value
         left_bar = LeftBar(request.user,session=session)
+        traces,titles,bar_names = Utils.get_default_questionnaire_traces(request.user,user_metrics)
+
+        plots = Utils.plotly_multitrace(bar_names,traces,titles,bar_names)
+        plot_data = zip(plots,titles)
+        plot_ids = []
+        for plot in plots:
+            plot_ids.append(Utils.find_plot_id(plot))
+
 
         return render(request,
                         template_name='main/session_tutors.html',
@@ -157,15 +166,17 @@ def session(request, session_slug):
                                     'resource_form_url':resource_form_url,
                                     'dl_resources_url':dl_resources_url,
                                     'questionnaire_url':questionnaire_url,
-                                    'rating':rating,
-                                    'left_bar':left_bar})
+                                    'left_bar':left_bar,
+                                    'plot_data':plot_data,
+                                    'plot_ids':plot_ids,})
 
     else:
-
+        left_bar = LeftBar(request.user)
         return render(request,
                         template_name='main/session_students.html',
                         context={'session':session,
-                                    'dl_resources_url':dl_resources_url})
+                                    'dl_resources_url':dl_resources_url,
+                                    'left_bar':left_bar})
 
 
 @login_required
@@ -228,6 +239,12 @@ def create_session(request):
         return redirect('main:home')
 
 
+@login_required
+def delete_session(request, session_slug):
+    session = Session.objects.get(slug=session_slug)
+    session.delete()
+
+    return redirect('main:home')
 def questionnaire(request, session_slug, questionnaire_slug):
     '''View questionnaire to fill in'''
 
@@ -349,29 +366,29 @@ def home(request):
     if Utils.is_group(request.user, 'Students'):
 
         attended_sessions = Session.objects.filter(submitted_questionnaire=request.user).order_by('-start_datetime')
+        left_bar = LeftBar(request.user)
 
         return render(request = request,
                       template_name='main/home_students.html',
-                      context={'attended_sessions':attended_sessions})
+                      context={'attended_sessions':attended_sessions,
+                                'left_bar':left_bar})
     else:
 
-        # TODO: AA - Combine default questionnaire plots into one Metric method
         user_metrics = Metrics(request.user,time_period_unit='all_time')
         hours_taught = user_metrics.hours_taught().value
         session_dates = user_metrics.session_dates
-
-        objective_score = user_metrics.objectives().value
         rating = user_metrics.rating().value
-        print(rating)
 
-        plot_titles = ['Hours taught','Rating']
-        plots = Utils.plotly_multitrace(session_dates,[hours_taught,rating],plot_titles)
-        plot_data = zip(plots,plot_titles)
-        plot_ids = []
-        for plot in plots:
-            plot_ids.append(Utils.find_plot_id(plot))
-
-        print(plot_ids)
+        if user_metrics.num_sessions > 0:
+            traces,titles,bar_names = Utils.get_default_questionnaire_traces(request.user,user_metrics)
+            plots = Utils.plotly_multitrace(session_dates,traces,titles,bar_names)
+            plot_data = zip(plots,titles)
+            plot_ids = []
+            for plot in plots:
+                plot_ids.append(Utils.find_plot_id(plot))
+        else:
+            plot_data = None
+            plot_ids = None
 
         left_bar = LeftBar(request.user,time_period='all_time')
         domain = Utils.get_domain()

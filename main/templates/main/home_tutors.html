@@ -3,13 +3,15 @@
 {% load qr_code %}
 
 {% block content %}
-
 <div class="row">
   {% include 'main/left_bar.html'%}
 
   <div class="col s12 m6 l6 ">
+    <br>
+    <h5>Welcome back <strong>{{request.user}}</strong></h5>
+    <div class="divider"></div>
+    <h5>Next session</h5>
     {% if next_session is not None %}
-    <h4>Next session</h4>
       <div class="card">
         <div class="card-content">
           <div class="row">
@@ -24,7 +26,7 @@
           <div class="row">
             <div class="col s10">
 
-              Date: {{next_session.start_datetime}}
+              Date: <strong>{{next_session.start_datetime}}</strong>
             </div>
           </div>
         </div>
@@ -33,10 +35,15 @@
             <a href="/sessions/{{next_session.slug}}/edit/">Edit</a>
         </div>
       </div>
-      <div class="divider"></div>
       {% endif %}
+      {% if next_session is None %}
+      No upcoming sessions :(
+      {% endif %}
+      <div class="divider"></div>
+      {% if plot_data is not None %}
       <h5>Charts</h5>
         <ul class="collapsible expandable">
+
           {% for plot, title in plot_data %}
           <li>
             <div class="collapsible-header">{{title}}</div>
@@ -47,6 +54,7 @@
             </div>
           </li>
           {% endfor %}
+          {% endif %}
         </ul>
 
     <!-- Modal Structure -->
@@ -78,8 +86,20 @@
 
 </div>
 
+<div class="fixed-action-btn">
+  <a href="{% url 'main:create_session' %}" class="btn-floating btn-large">
+    <i class="large material-icons">add</i>
+  </a>
+</div>
+
+
 
 <script>
+  document.addEventListener('DOMContentLoaded', function() {
+    var elems_fab = document.querySelectorAll('.fixed-action-btn');
+    var instances_fab = M.FloatingActionButton.init(elems_fab, {});
+  });
+
   document.addEventListener('DOMContentLoaded', function() {
     var elems_modal = document.querySelectorAll('.modal');
     var instances_modal = M.Modal.init(elems_modal, {});

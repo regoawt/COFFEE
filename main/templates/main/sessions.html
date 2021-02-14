@@ -2,9 +2,7 @@
 {% load static %}
 {% load qr_code %}
 
-<!-- TODO: Implement scrollspy with table of contents -->
 {% block content %}
-
 <div class="row">
   {% include 'main/left_bar.html'%}
 
@@ -25,13 +23,14 @@
           <div class="row">
             <div class="col s10">
 
-              Date: {{session.start_datetime}}
+              Date: <strong>{{session.start_datetime}}</strong>
             </div>
           </div>
         </div>
         <div class="card-action">
             <a href="/sessions/{{session.slug}}/">View</a>
             <a href="/sessions/{{session.slug}}/edit/">Edit</a>
+            <a href='' data-target="modal_delete{{session.slug}}" class='modal-trigger' style="">Delete</a>
         </div>
       </div>
 
@@ -42,6 +41,16 @@
       </div>
       <div class="modal-footer">
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+      </div>
+    </div>
+
+    <div id="modal_delete{{session.slug}}" class="modal">
+      <div class="modal-content">
+        <p class="center-align">Are you sure you want to delete this session?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="/sessions/{{session.slug}}/delete/" class="modal-close waves-effect waves-green btn-flat">Delete</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
       </div>
     </div>
   </div>

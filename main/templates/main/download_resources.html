@@ -3,8 +3,12 @@
 
 {% block content %}
 <div class="container">
-{% for resource in resources %}
-  <p><a href='{{ resource.url }}' download>{{ resource.name }}</a></p>
-{% endfor %}
+  {% if resources is not None %}
+    {% for resource in resources %}
+      <p><a href='{{ resource.url }}' download>{{ resource.name }}</a></p>
+    {% endfor %}
+  {% else %}
+    <p>No resources have been uploaded for this session.</p>
+  {% endif %}
 </div>
 {% endblock %}
