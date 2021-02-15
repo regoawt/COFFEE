@@ -11,8 +11,11 @@ def update_default_questionnaire(modeladmin,request,queryset):
     for user in queryset:
         if Utils.is_group(user,'Tutors'):
 
-            old_questionnaire = Questionnaire.objects.get(name='Default questionnaire',user=user)
-            old_questionnaire.delete()
+            try:
+                old_questionnaire = Questionnaire.objects.get(name='Default questionnaire',user=user)
+                old_questionnaire.delete()
+            except:
+                pass
 
             default_questionnaire = Questionnaire(name='Default questionnaire', user=user)
             default_questionnaire.save()
