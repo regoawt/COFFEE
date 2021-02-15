@@ -1,0 +1,20 @@
+{% load static %}
+
+<style media="screen">
+ #sticky {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 64;
+}
+</style>
+
+<div id="sticky">
+  <div class="col l3 m3 hide-on-small-only">
+    <div class="center-align" style="margin-top: 10%">
+      <img src='{% static 'main/images/hone-logo-ad-template.png' %}' width="60%"/>
+    </div>
+
+    {% block right_bar %}
+    {% endblock %}
+  </div>
+</div>

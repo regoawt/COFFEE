@@ -1,0 +1,11 @@
+{% extends 'main/right_bar.html' %}
+
+{% block right_bar %}
+<div style="margin-left: 15%">
+  <ul class="section table-of-contents">
+    {% for session in sessions %}
+      <li><a href="#{{session.name}}">{{session.name}}</a></li>
+    {% endfor%}
+  </ul>
+</div>
+{% endblock %}

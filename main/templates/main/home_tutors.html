@@ -68,21 +68,9 @@
       </div>
     </div>
     {% endif %}
-</div>
-
-  <div class="col l3 hide-on-small-only">
-    <div class="outer" style="position:fixed">
-      <div class="inner" style="position:absolute top">
-        <img src='{% static 'main/images/example_ad.png' %}' width="80%"/>
-      </div>
-      <style media="screen">
-      .inner {
-        margin-left: 20px;
-        width: 100%; /* Depending on the desired effect, width might be needed */
-      }
-      </style>
-    </div>
   </div>
+
+  {% include 'main/right_bar.html'%}
 
 </div>
 
