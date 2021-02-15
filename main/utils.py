@@ -75,6 +75,25 @@ class Utils:
                 bar_names.append(question_response.bar_names)
         return traces,titles,bar_names
 
+
+    def get_session_questionnaire_traces(user,metrics,session):
+        traces = []
+        titles = []
+        bar_names = []
+        plain_texts = []
+        plain_text_titles = []
+        for question in Question.objects.filter(questionnaire=session.questionnaire):
+            question_response = metrics.responses(question)
+            if question.question_category != 3:     # Filter out plain text questions
+                traces.append(question_response.value)
+                titles.append(question_response.title)
+                bar_names.append(question_response.bar_names)
+            else:
+                plain_texts.append(question_response.value)
+                plain_text_titles.append(question_response.title)
+        return traces,titles,bar_names,plain_texts,plain_text_titles
+
+
     def plotly_multitrace(x,traces,titles,bar_names):
         plots = []
         for i in range(len(traces)):

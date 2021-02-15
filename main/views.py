@@ -149,7 +149,7 @@ def session(request, session_slug):
         questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
         user_metrics = Metrics(request.user,session=session)
         left_bar = LeftBar(request.user,session=session)
-        traces,titles,bar_names = Utils.get_default_questionnaire_traces(request.user,user_metrics)
+        traces,titles,bar_names,plain_texts,plain_text_titles = Utils.get_session_questionnaire_traces(request.user,user_metrics,session)
 
         plots = Utils.plotly_multitrace(bar_names,traces,titles,bar_names)
         plot_data = zip(plots,titles)
@@ -157,6 +157,7 @@ def session(request, session_slug):
         for plot in plots:
             plot_ids.append(Utils.find_plot_id(plot))
 
+        plain_text_data = zip(plain_texts,plain_text_titles)
 
         return render(request,
                         template_name='main/session_tutors.html',
@@ -168,7 +169,8 @@ def session(request, session_slug):
                                     'questionnaire_url':questionnaire_url,
                                     'left_bar':left_bar,
                                     'plot_data':plot_data,
-                                    'plot_ids':plot_ids,})
+                                    'plot_ids':plot_ids,
+                                    'plain_text_data':plain_text_data,})
 
     else:
         left_bar = LeftBar(request.user)

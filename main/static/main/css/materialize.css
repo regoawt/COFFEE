@@ -2063,6 +2063,14 @@ html {
 *, *:before, *:after {
   box-sizing: inherit; }
 
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column; }
+
+main {
+  flex: 1 0 auto; }
+
 button,
 input,
 optgroup,
@@ -2305,8 +2313,8 @@ ul.staggered-list li {
 
 .page-footer {
   padding-top: 20px;
-  color: #fff;
-  background-color: #FFFFFF; }
+  color: #FFFFFF;
+  background-color: #007f88; }
   .page-footer .footer-copyright {
     overflow: hidden;
     min-height: 50px;

@@ -138,7 +138,7 @@ class Metrics:
                     self.bar_names = ['No','Yes']
 
                 elif question.question_category == 3:
-                    responses.append(session_responses)
+                    responses = session_responses
 
                 elif question.question_category == 4:
                     session_responses += [0,1,2,3,4,5]

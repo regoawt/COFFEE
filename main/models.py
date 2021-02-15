@@ -129,10 +129,10 @@ class PlainTextAnswer(Answer):
 
 class FiveScaleAnswer(Answer):
 
-    FIVESCALE_CHOICES = ((1,'1'),
+    FIVESCALE_CHOICES = ((1,'1 (low)'),
                         (2,'2'),
                         (3,'3'),
                         (4,'4'),
-                        (5,'5'))
+                        (5,'5 (high)'))
 
     answer = models.IntegerField(choices=FIVESCALE_CHOICES)

@@ -43,14 +43,18 @@
 </ul>
 
 <ul class='dropdown-content' id='account-dropdown-desktop'>
+  {% if user.is_superuser %}
     <li><a href="/admin/">Admin</a></li>
     <li class="divider" tabindex="-1"></li>
+  {% endif %}
     <li><a href="{% url 'main:logout' %}">Logout</a></li>
 </ul>
 
 <ul class='dropdown-content' id='account-dropdown-mobile'>
+  {% if user.is_superuser %}
     <li><a href="/admin/">Admin</a></li>
     <li class="divider" tabindex="-1"></li>
+  {% endif %}
     <li><a href="{% url 'main:logout' %}">Logout</a></li>
 </ul>
 
