@@ -22,5 +22,6 @@ urlpatterns = [
     path('', include('main.urls')),
     path('admin/', admin.site.urls),
     path('qr_code/', include('qr_code.urls', namespace="qr_code")),
-    url(r'^jsi18n/$', django_views.i18n.JavaScriptCatalog.as_view(), name='jsi18n')
+    url(r'^jsi18n/$', django_views.i18n.JavaScriptCatalog.as_view(), name='jsi18n'),
+    url('', include('pwa.urls')),
 ]

@@ -1,17 +1,22 @@
+{% load pwa %}
 <head>
     {% load static %}
+    {% progressive_web_app_meta %}
     <!-- Prism CSS -->
     <link href="{% static "tinymce/css/prism.css" %}" rel="stylesheet">
     <!-- Compiled and minified CSS -->
-    <link href="{% static "main/css/materialize.css" %}?{% now "U" %}" rel="stylesheet">
+    <link href="{% static "main/css/materialize.css" %}" rel="stylesheet">
+    <!-- ?{% now "U" %} -->
     <!-- Compiled and minified JavaScript for Materialize CSS -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="{% static "main/images/apple-touch-icon.png" %}">
+    <!-- <link rel="apple-touch-startup-image" href="{% static "main/images/hone-logo-splash.png" %}"> -->
 
-    <script data-ad-client="ca-pub-2098313122022569" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+    <!-- <script data-ad-client="ca-pub-2098313122022569" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script> -->
 
     {% block extrahead %}
     {% endblock %}
