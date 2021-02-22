@@ -107,9 +107,15 @@ def sessions(request, session_slug):
     domain = Utils.get_domain()
     if Utils.is_group(request.user,'Tutors'):
         if session_slug == 'future':
-            sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now()).order_by('start_datetime')
+            tutor_sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now())
+            additional_tutor_sessions = Session.objects.filter(additional_tutors=request.user,start_datetime__gt=datetime.now())
+            sessions = tutor_sessions | additional_tutor_sessions
+            sessions = sessions.order_by('start_datetime')
         elif session_slug == 'past':
-            sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now()).order_by('-start_datetime')
+            tutor_sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now())
+            additional_tutor_sessions = Session.objects.filter(additional_tutors=request.user,start_datetime__lt=datetime.now())
+            sessions = tutor_sessions | additional_tutor_sessions
+            sessions = sessions.order_by('-start_datetime')
         else:
             return session(request, session_slug)
 
