@@ -20,6 +20,7 @@ urlpatterns = [
     path('sessions/<slug:session_slug>/edit/', views.edit_session, name='edit_session'),
     path('sessions/<slug:session_slug>/enter_email/', views.enter_email, name='enter_email'),
     path('sessions/<slug:session_slug>/delete/', views.delete_session, name='delete_session'),
+    path('sessions/<slug:session_slug>/download_data/', views.download_session_data, name='download_data')
 
 ]
 

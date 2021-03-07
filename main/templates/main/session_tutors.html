@@ -15,8 +15,9 @@
     <div class="divider"></div>
 
     <p><a href='{{resource_form_url}}'><button class="btn">Add resources</button></a></p>
-    <p><a href='{{dl_resources_url}}'><button class="btn">Download resources</button></a></p>
+    <!-- <p><a href='{{dl_resources_url}}'><button class="btn">Download resources</button></a></p> -->
     <p><a href='{{questionnaire_url}}'><button class="btn">View questionnaire</button></a></p>
+    <p><input type="button" class='btn' value="Download responses" onclick="window.open('download_data')"></p>
     <div class="divider"></div>
 
     {% if plot_data is not None %}

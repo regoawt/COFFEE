@@ -1,12 +1,17 @@
 # Utility functions called in app
-from .models import Questionnaire, Question, Session
+from .models import Questionnaire, Question, Session, Answer, LikertAnswer, YesNoAnswer, PlainTextAnswer, FiveScaleAnswer
 from django.conf import settings
 from datetime import datetime
 from plotly.io import to_html
 import plotly.graph_objs as go
 import numpy as np
+import csv
 
 class Utils:
+
+    ANSWER_CLASS_CHOICES = {1:LikertAnswer, 2:YesNoAnswer, 3:PlainTextAnswer, 4:FiveScaleAnswer}
+    ANSWER_MAPPING = {1:{1:'Strongly disagree', 2:'Disagree', 3:'Neutral', 4:'Agree', 5:'Strongly agree',},
+                    2:{0:'No', 1:'Yes'}}
 
     def is_group(user, group):
         return user.groups.filter(name=group).exists()
@@ -35,7 +40,6 @@ class Utils:
 
 
     def create_default_questionnaire(user):
-
         default_questionnaire = Questionnaire(name='Default questionnaire', user=user)
         default_questionnaire.save()
 
@@ -50,7 +54,6 @@ class Utils:
 
 
     def get_next_session(user):
-
         future_sessions = Session.objects.filter(tutor=user,start_datetime__gt=datetime.now()).order_by('start_datetime')
 
         if future_sessions.count() > 0:
@@ -102,8 +105,12 @@ class Utils:
         return plots
 
     def plotly_trace(x,y,title,bar_name):
+        '''Generate HTML for plot of response data for dashboard'''
+
         y_array = np.array(y)
         fig = go.Figure()
+
+        # Plot as stacked bars against session date for home dashboard
         if np.shape(y)[0] > 1:
             for i in range(np.shape(y)[1]):
                 bar_stack_y = y_array[:,i]
@@ -112,6 +119,7 @@ class Utils:
             fig.update_layout(legend=dict(orientation="h",yanchor="bottom",y=1.02,xanchor="right",x=1,font=dict(
             size=10
             )))
+        # Normal bar chart for individual session data
         else:
             fig.add_trace(go.Bar(x=bar_name,y=y_array[0],opacity=0.8))
             fig.update_layout(autosize=True,height=400)
@@ -121,8 +129,36 @@ class Utils:
 
 
     def find_plot_id(plot):
+        '''Get plot ID from generated plot HTML'''
+
         start_index = plot.index('=')+2
         end_index = plot.index('class')-2
         id = plot[start_index:end_index]
 
         return id
+
+
+    def session_data_to_csv(response, session):
+        '''Generate CSV file to download from session responses'''
+
+        questions = Question.objects.filter(questionnaire=session.questionnaire)
+        respondents = [answer.user for answer in list(Answer.objects.filter(session=session, question=questions[0]))]
+        header_row = ['Question']
+        header_row.extend(['Respondent {}'.format(i+1) for i in range(len(respondents))])
+
+        writer = csv.writer(response)
+        writer.writerow(header_row)
+
+        for question in questions:
+            row = ['{}'.format(question.question)]
+            raw_answers = [answer.answer for answer in list(Utils.ANSWER_CLASS_CHOICES[question.question_category].objects.filter(session=session, question=question))]
+
+            # Convert numerical answers to related string for relevant question categories
+            if question.question_category == 1 or question.question_category == 2:
+                answers = [Utils.ANSWER_MAPPING[question.question_category][answer] for answer in raw_answers]
+            else:
+                answers = raw_answers
+            row.extend(answers)
+            writer.writerow(row)
+
+        return response

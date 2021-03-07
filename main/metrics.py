@@ -111,14 +111,7 @@ class Metrics:
         responses = []
         if self.num_sessions > 0:
             for session in self.sessions:
-                if question.question_category == 1:
-                    answers = LikertAnswer.objects.filter(session=session,question=question)
-                elif question.question_category == 2:
-                    answers = YesNoAnswer.objects.filter(session=session,question=question)
-                elif question.question_category == 3:
-                    answers = PlainTextAnswer.objects.filter(session=session,question=question)
-                elif question.question_category == 4:
-                    answers = FiveScaleAnswer.objects.filter(session=session,question=question)
+                answers = Utils.ANSWER_CLASS_CHOICES[question.question_category].objects.filter(session=session,question=question)
 
                 # Individual answers for question in each session
                 session_responses = []

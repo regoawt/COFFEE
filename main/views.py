@@ -24,6 +24,17 @@ from .bar import LeftBar
 # TODO: AA - Footer
 # TODO: AA - Mobile nav glitchy link
 
+def download_session_data(request, session_slug):
+    '''Download session data to CSV'''
+
+    session = Session.objects.get(slug=session_slug)
+    filename = '{}.csv'.format(session.name)
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+    response = Utils.session_data_to_csv(response, session)
+
+    return response
+
 def enter_email(request, session_slug):
     '''Enter email to be able to receive link to resources even as anonymous user'''
 
@@ -253,6 +264,8 @@ def delete_session(request, session_slug):
     session.delete()
 
     return redirect('main:home')
+
+
 def questionnaire(request, session_slug, questionnaire_slug):
     '''View questionnaire to fill in'''
 
