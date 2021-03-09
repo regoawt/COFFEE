@@ -36,7 +36,7 @@
     <li><a href="/sessions/past/">Past</a></li>
 </ul>
 
-<ul class='dropdown-content' id='sessions-dropdown-mobile'>
+<ul class='dropdown-content' style='transform: none' id='sessions-dropdown-mobile'>
     <li><a href="/sessions/future/">Future</a></li>
     <li class="divider" tabindex="-1"></li>
     <li><a href="/sessions/past/">Past</a></li>
@@ -64,8 +64,17 @@
     var instances_sidenav = M.Sidenav.init(elems_sidenav, {});
   });
 
+  // options to fix mobile sidenav dropdown bug https://stackoverflow.com/questions/61985187/materialize-css-side-nav-dropdown-wrong-links-on-ios-safari
+  var dropdownOptionsMobile = {
+    coverTrigger: false,
+    inDuration: 0,
+    outDuration: 0,
+    hover: false,
+    closeOnClick: false
+  }
+
   document.addEventListener('DOMContentLoaded', function() {
     var elems_dropdown = document.querySelectorAll('.dropdown-trigger');
-    var instances_dropdown = M.Dropdown.init(elems_dropdown, {});
+    var instances_dropdown = M.Dropdown.init(elems_dropdown, dropdownOptionsMobile);
   });
 </script>
