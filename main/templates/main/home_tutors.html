@@ -49,7 +49,7 @@
 
           {% for plot, title in plot_data %}
           <li>
-            <div class="collapsible-header">{{title}}</div>
+            <div class="collapsible-header"><i class="material-icons">expand_more</i>{{title}}</div>
             <div class="collapsible-body">
               {% autoescape off %}
               {{ plot }}
@@ -104,8 +104,20 @@
   document.addEventListener('DOMContentLoaded', function() {
     var elems_collapsible = document.querySelectorAll('.collapsible.expandable');
     var instances_collapsible = M.Collapsible.init(elems_collapsible, {
-      accordion: false
+      accordion: false,
+      onOpenStart: function(el) {
+        el.firstElementChild.firstElementChild.textContent = 'expand_less';
+      },
+      onCloseStart: function(el) {
+        el.firstElementChild.firstElementChild.textContent = 'expand_more';
+      }
     });
+    // Open first one on load
+    // var instance1 = instances_collapsible[0]
+    // var plotIDs = {{plot_ids|safe}};
+    // var plot0 = String(plotIDs[0])
+    // instance1.open(0)
+    // Plotly.Plots.resize(plot0);
   });
 
   var c_headers = document.querySelectorAll('div.collapsible-header');
@@ -119,7 +131,6 @@
         });
       }());
   };
-
 
 </script>
 {% endblock %}

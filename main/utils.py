@@ -123,7 +123,7 @@ class Utils:
         else:
             fig.add_trace(go.Bar(x=bar_name,y=y_array[0],opacity=0.8))
             fig.update_layout(autosize=True,height=400)
-        plot_div = to_html(fig,include_plotlyjs=False,full_html=False)
+        plot_div = to_html(fig,include_plotlyjs=False,full_html=False,config={'displayModeBar': False})
 
         return plot_div
 
