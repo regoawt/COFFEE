@@ -50,7 +50,7 @@ class Session(models.Model):
 
     name = models.CharField(max_length=100)
     start_datetime = models.DateTimeField(default=timezone.now())
-    end_datetime = models.DateTimeField(default=timezone.now()+timezone.timedelta(hours=1))
+    duration = models.DurationField(default=timezone.timedelta(hours=1))
     type = models.IntegerField(choices=TYPE_CHOICES)
     tutor = models.ForeignKey(User,on_delete=models.SET_NULL, blank=True, null=True, related_name='tutor')
     additional_tutors = models.ManyToManyField(User, blank=True, related_name='additional_tutors')

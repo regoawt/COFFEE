@@ -1,6 +1,6 @@
 from .models import Session, LikertAnswer, YesNoAnswer, FiveScaleAnswer, PlainTextAnswer
 from .utils import Utils
-from datetime import datetime
+from datetime import datetime, timedelta
 import numpy as np
 
 class Metrics:
@@ -12,19 +12,17 @@ class Metrics:
         # If no session is specified calculate period averages
         if session == None:
             if time_period_unit == 'day':
-                time_period_start = datetime.today() - datetime.timedelta(days=time_period)
-                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,
-                start_datetime__lt=datetime.now())
+                time_period_start = datetime.today() - timedelta(days=time_period)
             elif time_period_unit == 'week':
-                time_period_start = datetime.today() - datetime.timedelta(weeks=time_period)
-                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,
-                start_datetime__lt=datetime.now())
+                time_period_start = datetime.today() - timedelta(weeks=time_period)
             elif time_period_unit == 'month':
-                time_period_start = datetime.today() - datetime.timedelta(days=(time_period*31))
-                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,
-                start_datetime__lt=datetime.now())
+                time_period_start = datetime.today() - timedelta(days=(time_period*31))
             elif time_period_unit == 'all_time':
-                self.sessions = Session.objects.filter(tutor=self.user,start_datetime__lt=datetime.now())
+                time_period_start = datetime.today() - timedelta(weeks=1000)
+
+            own_sessions = Session.objects.filter(tutor=self.user,start_datetime__gt=time_period_start,start_datetime__lt=datetime.now())
+            add_sessions = Session.objects.filter(additional_tutors=self.user,start_datetime__gt=time_period_start,start_datetime__lt=datetime.now())
+            self.sessions = own_sessions | add_sessions
         else:
             self.sessions = [session]
 
@@ -60,7 +58,7 @@ class Metrics:
         hours = []
         if self.num_sessions > 0:
             for session in self.sessions:
-                session_duration = session.end_datetime - session.start_datetime
+                session_duration = session.duration
                 session_duration_hours = session_duration.total_seconds()/3600
                 hours.append(session_duration_hours)
         else:

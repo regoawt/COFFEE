@@ -84,9 +84,8 @@ class SessionForm(forms.ModelForm):
     class Meta:
         # TODO: AA - DateTime picker input format to British
         model =  Session
-        fields = ('name','start_datetime','end_datetime','type','additional_tutors','questionnaire')
+        fields = ('name','start_datetime','duration','type','additional_tutors','questionnaire')
         widgets = {'start_datetime': DateTimePickerInput(),
-                    'end_datetime': DateTimePickerInput(),
                     'type':forms.Select(attrs={'class': 'browser-default'}),
                     'additional_tutors': forms.SelectMultiple(attrs={'class': 'browser-default'}),
                     'questionnaire': forms.Select(attrs={'class': 'browser-default'}),
