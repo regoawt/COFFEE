@@ -59,7 +59,7 @@ class Metrics:
         if self.num_sessions > 0:
             for session in self.sessions:
                 session_duration = session.duration
-                session_duration_hours = session_duration.total_seconds()/3600
+                session_duration_hours = np.round(session_duration.total_seconds()/3600,2)
                 hours.append(session_duration_hours)
         else:
             hours = [0]
