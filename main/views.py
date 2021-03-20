@@ -127,6 +127,8 @@ def sessions(request, session_slug):
             additional_tutor_sessions = Session.objects.filter(additional_tutors=request.user,start_datetime__lt=datetime.now())
             sessions = tutor_sessions | additional_tutor_sessions
             sessions = sessions.order_by('-start_datetime')
+        elif session_slug == 'attended':
+            sessions = Session.objects.filter(submitted_questionnaire=request.user).order_by('start_datetime')
         else:
             return session(request, session_slug)
 

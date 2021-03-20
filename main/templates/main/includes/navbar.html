@@ -1,4 +1,5 @@
 {% load static %}
+{% load main_extras %}
 
 <div class="navbar-fixed">
   <nav>
@@ -22,24 +23,32 @@
 <ul class='sidenav' id='mobile-demo'>
   <li><a href="{% url 'main:home' %}">Home</a></li>
   {% if user.is_authenticated %}
-  <li><a class='dropdown-trigger' href="" data-target='sessions-dropdown-mobile'>Sessions</a></li>
-  <li><a class='dropdown-trigger' href="" data-target='account-dropdown-mobile'>Account</a></li>
+    <li><a class='dropdown-trigger' href="" data-target='sessions-dropdown-mobile'>Sessions</a></li>
+    <li><a class='dropdown-trigger' href="" data-target='account-dropdown-mobile'>Account</a></li>
   {% else %}
-  <li><a href="{% url 'main:login' %}">Login</a></li>
-  <li><a href="{% url 'main:register' %}">Register</a></li>
+    <li><a href="{% url 'main:login' %}">Login</a></li>
+    <li><a href="{% url 'main:register' %}">Register</a></li>
   {% endif %}
 </ul>
 
 <ul class='dropdown-content' id='sessions-dropdown-desktop'>
-    <li><a href="/sessions/future/">Future</a></li>
+  <li><a href="/sessions/future/">Future</a></li>
+  <li class="divider" tabindex="-1"></li>
+  <li><a href="/sessions/past/">Past</a></li>
+  {% if user|in_group:"Tutors" %}
     <li class="divider" tabindex="-1"></li>
-    <li><a href="/sessions/past/">Past</a></li>
+    <li><a href="/sessions/attended/">Attended</a></li>
+  {% endif %}
 </ul>
 
 <ul class='dropdown-content' style='transform: none' id='sessions-dropdown-mobile'>
     <li><a href="/sessions/future/">Future</a></li>
     <li class="divider" tabindex="-1"></li>
     <li><a href="/sessions/past/">Past</a></li>
+    {% if user|in_group:"Tutors" %}
+      <li class="divider" tabindex="-1"></li>
+      <li><a href="/sessions/attended/">Attended</a></li>
+    {% endif %}
 </ul>
 
 <ul class='dropdown-content' id='account-dropdown-desktop'>
