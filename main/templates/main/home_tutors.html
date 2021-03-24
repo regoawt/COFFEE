@@ -34,12 +34,12 @@
           </div>
         </div>
         <div class="card-action">
-          <a href="/sessions/{{session.slug}}/">View</a>
+          <a href="/sessions/{{next_session.slug}}/">View</a>
           {% if user in next_session.additional_tutors.all or next_session.tutor == user %}
-            <a href="/sessions/{{session.slug}}/edit/">Edit</a>
+            <a href="/sessions/{{next_session.slug}}/edit/">Edit</a>
           {% endif %}
           {% if next_session.tutor == user %}
-            <a href='' data-target="modal_delete{{session.slug}}" class='modal-trigger' style="">Delete</a>
+            <a href='' data-target="modal_delete{{next_session.slug}}" class='modal-trigger' style="">Delete</a>
           {% endif %}
         </div>
       </div>
@@ -73,6 +73,16 @@
       </div>
       <div class="modal-footer">
         <a href="#!" class="modal-close waves-effect waves-green btn-flat">Close</a>
+      </div>
+    </div>
+
+    <div id="modal_delete{{next_session.slug}}" class="modal">
+      <div class="modal-content">
+        <p class="center-align">Are you sure you want to delete this session?</p>
+      </div>
+      <div class="modal-footer">
+        <a href="/sessions/{{next_session.slug}}/delete/" class="modal-close waves-effect waves-green btn-flat">Delete</a>
+        <a href="#!" class="modal-close waves-effect waves-green btn-flat">Cancel</a>
       </div>
     </div>
     {% endif %}
