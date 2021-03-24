@@ -24,16 +24,19 @@ from .bar import LeftBar
 # TODO: AA - Footer
 # TODO: AA - Mobile nav glitchy link
 
+
 def download_session_data(request, session_slug):
     '''Download session data to CSV'''
 
     session = Session.objects.get(slug=session_slug)
     filename = '{}.csv'.format(session.name)
     response = HttpResponse(content_type='text/csv')
-    response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+    response['Content-Disposition'] = 'attachment; filename={}'.format(
+        filename)
     response = Utils.session_data_to_csv(response, session)
 
     return response
+
 
 def enter_email(request, session_slug):
     '''Enter email to be able to receive link to resources even as anonymous user'''
@@ -48,28 +51,30 @@ def enter_email(request, session_slug):
         if email_form.is_valid():
             address = email_form.cleaned_data.get('email_address')
             subject = 'Link to download resources for {}'.format(session.name)
-            body = 'Thank you for completing the questionnaire. Please use the following link to access your resources {}{}'.format(domain,dl_resources_url)
-            message = EmailMessage(subject=subject,body=body,to=[address])
+            body = 'Thank you for completing the questionnaire. Please use the following link to access your resources {}{}'.format(
+                domain, dl_resources_url)
+            message = EmailMessage(subject=subject, body=body, to=[address])
             message.send()
 
             return redirect('main:home')
 
         else:
             return render(request,
-                            template_name='main/enter_email.html',
-                            context={'form':email_form})
+                          template_name='main/enter_email.html',
+                          context={'form': email_form})
 
     else:
         email_form = EmailForm()
         return render(request,
-                        template_name='main/enter_email.html',
-                        context={'form':email_form})
+                      template_name='main/enter_email.html',
+                      context={'form': email_form})
+
 
 @login_required
 def upload_resources(request, session_slug):
     '''Upload resources'''
 
-    if Utils.is_group(request.user,'Tutors'):
+    if Utils.is_group(request.user, 'Tutors'):
         session = Session.objects.get(slug=session_slug)
 
         if request.method == 'POST':
@@ -85,17 +90,17 @@ def upload_resources(request, session_slug):
 
             else:
                 return render(request,
-                                template_name='main/resource_form.html',
-                                context={'form':resource_form})
+                              template_name='main/resource_form.html',
+                              context={'form': resource_form})
 
         else:
             resource_form = ResourceForm()
             return render(request,
-                            template_name='main/resource_form.html',
-                            context={'form':resource_form})
+                          template_name='main/resource_form.html',
+                          context={'form': resource_form})
 
     else:
-        messages.error(request,'Students cannot access this area!')
+        messages.error(request, 'Students cannot access this area!')
 
         return redirect('main:home')
 
@@ -103,12 +108,13 @@ def upload_resources(request, session_slug):
 def download_resources(request, session_slug):
     '''Download resources'''
 
-    resources = [resource.file for resource in list(Resource.objects.filter(session__slug=session_slug))]
+    resources = [resource.file for resource in list(
+        Resource.objects.filter(session__slug=session_slug))]
     if len(resources) == 0:
         resources = None
     return render(request,
-                    template_name='main/download_resources.html',
-                    context={'resources':resources})
+                  template_name='main/download_resources.html',
+                  context={'resources': resources})
 
 
 @login_required
@@ -116,40 +122,45 @@ def sessions(request, session_slug):
     '''View all sessions'''
 
     domain = Utils.get_domain()
-    if Utils.is_group(request.user,'Tutors'):
+    if Utils.is_group(request.user, 'Tutors'):
         if session_slug == 'future':
-            tutor_sessions = Session.objects.filter(tutor=request.user,start_datetime__gt=datetime.now())
-            additional_tutor_sessions = Session.objects.filter(additional_tutors=request.user,start_datetime__gt=datetime.now())
+            tutor_sessions = Session.objects.filter(
+                tutor=request.user, start_datetime__gt=datetime.now())
+            additional_tutor_sessions = Session.objects.filter(
+                additional_tutors=request.user, start_datetime__gt=datetime.now())
             sessions = tutor_sessions | additional_tutor_sessions
             sessions = sessions.order_by('start_datetime')
         elif session_slug == 'past':
-            tutor_sessions = Session.objects.filter(tutor=request.user,start_datetime__lt=datetime.now())
-            additional_tutor_sessions = Session.objects.filter(additional_tutors=request.user,start_datetime__lt=datetime.now())
+            tutor_sessions = Session.objects.filter(
+                tutor=request.user, start_datetime__lt=datetime.now())
+            additional_tutor_sessions = Session.objects.filter(
+                additional_tutors=request.user, start_datetime__lt=datetime.now())
             sessions = tutor_sessions | additional_tutor_sessions
             sessions = sessions.order_by('-start_datetime')
         elif session_slug == 'attended':
-            sessions = Session.objects.filter(submitted_questionnaire=request.user).order_by('start_datetime')
+            sessions = Session.objects.filter(
+                submitted_questionnaire=request.user).order_by('start_datetime')
         else:
             return session(request, session_slug)
 
-
-        qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug) for session in sessions]
+        qr_urls = ['{}/sessions/{}/questionnaire/{}/'.format(
+            domain, session.slug, session.questionnaire.slug) for session in sessions]
         zipped_data = zip(sessions, qr_urls)
 
-        left_bar = LeftBar(request.user,time_period='all_time')
+        left_bar = LeftBar(request.user, time_period='all_time')
 
         return render(request,
-                        template_name='main/sessions.html',
-                        context={'zipped_data':zipped_data,
-                                    'sessions':sessions,
-                                    'left_bar':left_bar
-                                    })
+                      template_name='main/sessions.html',
+                      context={'zipped_data': zipped_data,
+                                    'sessions': sessions,
+                                    'left_bar': left_bar
+                               })
 
     else:
         if session_slug == 'future' or session_slug == 'past':
             return redirect('main:home')
         else:
-            return session(request,session_slug)
+            return session(request, session_slug)
 
 
 @login_required
@@ -163,41 +174,44 @@ def session(request, session_slug):
     if Utils.is_group(request.user, 'Tutors'):
         # FIXME: AA - Case where session.questionnaire is null for qr_url and questionnaire_url
         qr_options = QRCodeOptions(size='l', border=6, error_correction='M')
-        qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,session.slug,session.questionnaire.slug)
+        qr_url = '{}/sessions/{}/questionnaire/{}/'.format(
+            domain, session.slug, session.questionnaire.slug)
         resource_form_url = '/sessions/{}/upload/'.format(session.slug)
-        questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(session.slug, session.questionnaire.slug)
-        user_metrics = Metrics(request.user,session=session)
-        left_bar = LeftBar(request.user,session=session)
-        traces,titles,bar_names,plain_texts,plain_text_titles = Utils.get_session_questionnaire_traces(request.user,user_metrics,session)
+        questionnaire_url = '/sessions/{}/questionnaire/{}/'.format(
+            session.slug, session.questionnaire.slug)
+        user_metrics = Metrics(request.user, session=session)
+        left_bar = LeftBar(request.user, session=session)
+        traces, titles, bar_names, plain_texts, plain_text_titles = Utils.get_session_questionnaire_traces(
+            request.user, user_metrics, session)
 
-        plots = Utils.plotly_multitrace(bar_names,traces,titles,bar_names)
-        plot_data = zip(plots,titles)
+        plots = Utils.plotly_multitrace(bar_names, traces, titles, bar_names)
+        plot_data = zip(plots, titles)
         plot_ids = []
         for plot in plots:
             plot_ids.append(Utils.find_plot_id(plot))
 
-        plain_text_data = zip(plain_texts,plain_text_titles)
+        plain_text_data = zip(plain_texts, plain_text_titles)
 
         return render(request,
-                        template_name='main/session_tutors.html',
-                        context={'session':session,
-                                    'qr_options':qr_options,
-                                    'qr_url':qr_url,
-                                    'resource_form_url':resource_form_url,
-                                    'dl_resources_url':dl_resources_url,
-                                    'questionnaire_url':questionnaire_url,
-                                    'left_bar':left_bar,
-                                    'plot_data':plot_data,
-                                    'plot_ids':plot_ids,
-                                    'plain_text_data':plain_text_data,})
+                      template_name='main/session_tutors.html',
+                      context={'session': session,
+                                    'qr_options': qr_options,
+                                    'qr_url': qr_url,
+                                    'resource_form_url': resource_form_url,
+                                    'dl_resources_url': dl_resources_url,
+                                    'questionnaire_url': questionnaire_url,
+                                    'left_bar': left_bar,
+                                    'plot_data': plot_data,
+                                    'plot_ids': plot_ids,
+                                    'plain_text_data': plain_text_data, })
 
     else:
         left_bar = LeftBar(request.user)
         return render(request,
-                        template_name='main/session_students.html',
-                        context={'session':session,
-                                    'dl_resources_url':dl_resources_url,
-                                    'left_bar':left_bar})
+                      template_name='main/session_students.html',
+                      context={'session': session,
+                                    'dl_resources_url': dl_resources_url,
+                                    'left_bar': left_bar})
 
 
 @login_required
@@ -208,7 +222,8 @@ def edit_session(request, session_slug):
 
         session = Session.objects.get(slug=session_slug)
         if request.method == 'POST':
-            session_form = SessionForm(request.POST, instance=session, current_user=request.user)
+            session_form = SessionForm(
+                request.POST, instance=session, current_user=request.user)
 
             if session_form.is_valid():
                 session = session_form.save()
@@ -218,13 +233,15 @@ def edit_session(request, session_slug):
 
             else:
                 return render(request,
-                                template_name='main/session_form.html',
-                                context={'form':session_form})
+                              template_name='main/session_form.html',
+                              context={'form': session_form})
         else:
-            session_form = SessionForm(instance=session, current_user=request.user)
+            session_form = SessionForm(
+                instance=session, current_user=request.user)
             return render(request,
-                            template_name='main/session_form.html',
-                            context={'form':session_form})
+                          template_name='main/session_form.html',
+                          context={'form': session_form})
+
 
 @login_required
 def create_session(request):
@@ -232,7 +249,8 @@ def create_session(request):
 
     if Utils.is_group(request.user, 'Tutors'):
         if request.method == 'POST':
-            session_form = SessionForm(request.POST, request.FILES, current_user=request.user)
+            session_form = SessionForm(
+                request.POST, request.FILES, current_user=request.user)
 
             if session_form.is_valid():
                 session = session_form.save(commit=False)
@@ -244,18 +262,18 @@ def create_session(request):
 
             else:
                 return render(request,
-                                template_name='main/session_form.html',
-                                context={'form':session_form})
+                              template_name='main/session_form.html',
+                              context={'form': session_form})
 
         else:
             session_form = SessionForm(current_user=request.user)
 
             return render(request,
-                            template_name='main/session_form.html',
-                            context={'form':session_form})
+                          template_name='main/session_form.html',
+                          context={'form': session_form})
 
     else:
-        messages.error(request,'Students cannot access this area!')
+        messages.error(request, 'Students cannot access this area!')
 
         return redirect('main:home')
 
@@ -310,7 +328,7 @@ def questionnaire(request, session_slug, questionnaire_slug):
                 answer_form = PlainTextForm(raw_post)
             elif question.question_category == 4:
                 answer_form = FiveScaleForm(raw_post)
-            i+=1
+            i += 1
 
             # Save and assign extra fields
             # BUG: If one answer form is invalid, are all previously saved answers duplicated on second post?
@@ -324,8 +342,8 @@ def questionnaire(request, session_slug, questionnaire_slug):
 
             else:
                 return render(request,
-                                template_name='main/questionnaire.html',
-                                context={'question_and_answer':question_and_answer})
+                              template_name='main/questionnaire.html',
+                              context={'question_and_answer': question_and_answer})
 
         if request.user.is_authenticated:
             session = Session.objects.get(slug=session_slug)
@@ -336,11 +354,11 @@ def questionnaire(request, session_slug, questionnaire_slug):
             return redirect('main:enter_email', session_slug=session_slug)
 
     else:
-        question_and_answer = zip(question_texts,answer_forms)
+        question_and_answer = zip(question_texts, answer_forms)
 
         return render(request,
-                        template_name='main/questionnaire.html',
-                        context={'question_and_answer':question_and_answer})
+                      template_name='main/questionnaire.html',
+                      context={'question_and_answer': question_and_answer})
 
 
 @login_required
@@ -354,31 +372,35 @@ def create_questionnaire(request):
             if questionnaire_formset.is_valid():
 
                 # Create new questionnaire instance and link to newly created questions
-                current_number_questionnaires = Questionnaire.objects.filter(user=request.user).count()
-                new_questionnaire_name = 'Questionnaire ' + str(current_number_questionnaires+1)
-                new_questionnaire = Questionnaire(name=new_questionnaire_name, user=request.user)
+                current_number_questionnaires = Questionnaire.objects.filter(
+                    user=request.user).count()
+                new_questionnaire_name = 'Questionnaire ' + \
+                    str(current_number_questionnaires+1)
+                new_questionnaire = Questionnaire(
+                    name=new_questionnaire_name, user=request.user)
                 new_questionnaire.save()
 
                 # Iterate through questions and assign to new questionnaire instance
                 for form in questionnaire_formset:
                     question = form.save()
-                    question.questionnaire = new_questionnaire
+                    question.questionnaire.add(new_questionnaire)
                     question.save()
 
                 return redirect('main:home')
 
             else:
                 return render(request,
-                                template_name='main/questionnaire_form.html',
-                                context={'formset':questionnaire_formset})
+                              template_name='main/questionnaire_form.html',
+                              context={'formset': questionnaire_formset})
         else:
-            questionnaire_formset = QuestionModelFormSet(queryset=Question.objects.none())  # queryset set to none for empty formset
+            questionnaire_formset = QuestionModelFormSet(
+                queryset=Question.objects.none())  # queryset set to none for empty formset
             return render(request,
-                            template_name='main/questionnaire_form.html',
-                            context={'formset':questionnaire_formset})
+                          template_name='main/questionnaire_form.html',
+                          context={'formset': questionnaire_formset})
 
     else:
-        messages.error(request,'Students cannot access this area!')
+        messages.error(request, 'Students cannot access this area!')
 
         return redirect('main:home')
 
@@ -388,24 +410,27 @@ def home(request):
 
     if Utils.is_group(request.user, 'Students'):
 
-        attended_sessions = Session.objects.filter(submitted_questionnaire=request.user).order_by('-start_datetime')
+        attended_sessions = Session.objects.filter(
+            submitted_questionnaire=request.user).order_by('-start_datetime')
         left_bar = LeftBar(request.user)
 
-        return render(request = request,
+        return render(request=request,
                       template_name='main/home_students.html',
-                      context={'attended_sessions':attended_sessions,
-                                'left_bar':left_bar})
+                      context={'attended_sessions': attended_sessions,
+                               'left_bar': left_bar})
     else:
 
-        user_metrics = Metrics(request.user,time_period_unit='all_time')
+        user_metrics = Metrics(request.user, time_period_unit='all_time')
         hours_taught = user_metrics.hours_taught().value
         session_dates = user_metrics.session_dates
         rating = user_metrics.rating().value
 
         if user_metrics.num_sessions > 0:
-            traces,titles,bar_names = Utils.get_default_questionnaire_traces(request.user,user_metrics)
-            plots = Utils.plotly_multitrace(session_dates,traces,titles,bar_names)
-            plot_data = zip(plots,titles)
+            traces, titles, bar_names = Utils.get_default_questionnaire_traces(
+                request.user, user_metrics)
+            plots = Utils.plotly_multitrace(
+                session_dates, traces, titles, bar_names)
+            plot_data = zip(plots, titles)
             plot_ids = []
             for plot in plots:
                 plot_ids.append(Utils.find_plot_id(plot))
@@ -413,22 +438,23 @@ def home(request):
             plot_data = None
             plot_ids = None
 
-        left_bar = LeftBar(request.user,time_period='all_time')
+        left_bar = LeftBar(request.user, time_period='all_time')
         domain = Utils.get_domain()
         next_session = Utils.get_next_session(request.user)
         if next_session is not None:
-            qr_url = '{}/sessions/{}/questionnaire/{}/'.format(domain,next_session.slug,next_session.questionnaire.slug)
+            qr_url = '{}/sessions/{}/questionnaire/{}/'.format(
+                domain, next_session.slug, next_session.questionnaire.slug)
         else:
             qr_url = None
 
-        return render(request = request,
+        return render(request=request,
                       template_name='main/home_tutors.html',
-                      context={'hours_taught':hours_taught,
-                                'left_bar':left_bar,
-                                'plot_data':plot_data,
-                                'plot_ids':plot_ids,
-                                'next_session':next_session,
-                                'qr_url':qr_url})
+                      context={'hours_taught': hours_taught,
+                               'left_bar': left_bar,
+                               'plot_data': plot_data,
+                               'plot_ids': plot_ids,
+                               'next_session': next_session,
+                               'qr_url': qr_url})
 
 
 def register(request):
@@ -448,16 +474,16 @@ def register(request):
 
         else:
 
-            return render(request = request,
-                          template_name = "main/register.html",
-                          context={"user_form":user_form})
+            return render(request=request,
+                          template_name="main/register.html",
+                          context={"user_form": user_form})
 
     else:
         user_form = NewUserForm()
 
         return render(request=request,
-        template_name='main/register.html',
-        context={'user_form':user_form})
+                      template_name='main/register.html',
+                      context={'user_form': user_form})
 
 
 @login_required
@@ -482,18 +508,17 @@ def select_group(request):
                 group = Group.objects.get(name='Students')
                 user.groups.add(group)
 
-
             return redirect('main:home')
 
         else:
-            return render(request = request,
-                          template_name = "main/group_form.html",
-                          context={"group_form":group_form})
+            return render(request=request,
+                          template_name="main/group_form.html",
+                          context={"group_form": group_form})
 
     group_form = GroupSelectionForm()
-    return render(request = request,
-                  template_name = "main/group_form.html",
-                  context={'form':group_form})
+    return render(request=request,
+                  template_name="main/group_form.html",
+                  context={'form': group_form})
 
 
 @login_required
