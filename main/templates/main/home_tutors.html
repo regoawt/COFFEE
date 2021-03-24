@@ -34,8 +34,13 @@
           </div>
         </div>
         <div class="card-action">
-            <a href="/sessions/{{next_session.slug}}/">View</a>
-            <a href="/sessions/{{next_session.slug}}/edit/">Edit</a>
+          <a href="/sessions/{{session.slug}}/">View</a>
+          {% if user in session.additional_tutors.all or session.tutor == user %}
+            <a href="/sessions/{{session.slug}}/edit/">Edit</a>
+          {% endif %}
+          {% if session.tutor == user %}
+            <a href='' data-target="modal_delete{{session.slug}}" class='modal-trigger' style="">Delete</a>
+          {% endif %}
         </div>
       </div>
       {% endif %}
